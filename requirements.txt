@@ -3,3 +3,4 @@ uvicorn[standard]
 psycopg[binary]
 PyJWT
 argon2-cffi
+cryptography
