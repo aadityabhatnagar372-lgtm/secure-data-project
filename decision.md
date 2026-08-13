@@ -328,4 +328,50 @@ No application code yet. This decision selects the database driver for the upcom
 
 **Follow-up**
 
-Install Psycopg 3 and implement a small database connection layer.
+Install Psycopg 3 and implement a small database connection layer.git status
+
+---
+
+## 2026-08-13 — Keep database connection settings outside application code
+
+**Decision**
+
+Read the PostgreSQL connection settings from environment variables instead of hardcoding them in Python source code.
+
+**Why this approach**
+
+Database passwords and connection details should not be embedded directly in application source files. Environment variables let the same application code work with different development, testing, and deployment configurations.
+
+**Alternatives considered**
+
+- Hardcode the database credentials in `database.py` — simpler for the first test, but exposes secrets in source code.
+- Store credentials directly in Git-tracked configuration — not appropriate because secrets could be committed accidentally.
+
+**Libraries / technologies involved**
+
+- Python `os` environment-variable support
+
+**Why this technology**
+
+It is built into Python, so no additional dependency is required for this basic configuration layer.
+
+**Security impact**
+
+Positive because the database password does not need to be stored in the Python source code.
+
+**Trade-offs / risks**
+
+Environment variables still need to be protected properly. The current Docker Compose development configuration uses a simple development password and should be replaced with safer secret handling before production use.
+
+**Files changed**
+
+- `decision.md`
+- `app/database.py`
+
+**Code impact**
+
+The database module will read its connection settings from environment variables.
+
+**Follow-up**
+
+Implement the connection function and verify that the FastAPI application can connect to PostgreSQL.
