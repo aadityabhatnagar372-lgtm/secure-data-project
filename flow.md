@@ -2704,3 +2704,75 @@ The current automated suite covers the core security and availability mechanisms
 Current limitation
 
 The tests are primarily unit-level tests and mocked failover tests.
+
+---
+
+## 54. Final Security Verification Checklist — Milestone 45
+
+**Verification scope**
+
+The final manual verification will cover the major security and availability controls implemented in the project.
+
+### Authentication
+
+- Valid JWT authentication
+- Invalid JWT rejection
+- Successful login audit event
+- Failed login audit event
+
+### Authorization
+
+- Unauthorized customer access rejected
+- Wrong-user access key rejected
+- Wrong-customer access key rejected
+- Wrong-field access key rejected
+
+### Data minimization
+
+- Only the requested customer field is returned
+- Unauthorized fields are rejected
+
+### Short-lived access keys
+
+- Access key generation
+- Approximately 10-minute expiration
+- Expired key rejection
+- Missing access key rejection
+
+### Encryption
+
+- Fernet encryption/decryption
+- Plaintext is not exposed in encrypted output
+- Encryption key is supplied through environment configuration
+
+### Audit logging
+
+- Login events
+- Authorization-denial events
+- Access-key issuance
+- Customer-data access
+- Data-node errors
+- Failover exhaustion
+- Sensitive secrets excluded from logs
+
+### Availability
+
+- Primary node failure
+- Application-level replica failover
+- PostgreSQL Replica 1
+- PostgreSQL Replica 2
+- Streaming replication to both replicas
+
+### Automated verification
+
+Current automated result:
+
+`18 passed`
+
+### Final limitation
+
+The final manual security verification must still be performed against the running application and Docker PostgreSQL topology before the project can be considered fully verified.
+
+### Final documentation
+
+After the manual checks pass, update the README with the final architecture, security controls, verification results, and project limitations.
