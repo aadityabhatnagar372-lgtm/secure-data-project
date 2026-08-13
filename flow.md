@@ -1642,3 +1642,67 @@ The round-trip test confirms that encrypted data can be recovered with the corre
 Current limitation
 
 The encryption service is not yet integrated into the customer-data request flow.
+
+---
+
+## 34. Code-Verified 10-Minute Access Key Generation — Milestone 25
+
+**Verified on:** 2026-08-13
+
+### Module
+
+`app/access_key.py`
+
+### Function
+
+`generate_access_key(user_id, customer_id, field)`
+
+### Verification
+
+Test input:
+
+- User ID: `2`
+- Customer ID: `1`
+- Field: `email`
+
+### Verification result
+
+- Token generated: `True`
+- User ID: `2`
+- Customer ID: `1`
+- Field: `email`
+- Expiration was generated approximately 10 minutes after creation.
+
+### Current verified flow
+
+Authorized user
+    ↓
+`generate_access_key()`
+    ↓
+Cryptographically random token
+    ↓
+Bind token to user/customer/field
+    ↓
+Set expiration to 10 minutes
+    ↓
+Return access-key record
+
+### Security result
+
+The access key is:
+
+- Random
+- User-scoped
+- Customer-scoped
+- Field-scoped
+- Time-limited
+
+### Current limitation
+
+The access key is only generated at this stage.
+
+It is not yet stored, validated, used to access data, or rejected after expiration.
+
+### Next step
+
+Implement access-key storage and validation so expired or incorrectly scoped keys cannot be used.
