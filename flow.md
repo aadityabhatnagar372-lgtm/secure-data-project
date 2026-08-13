@@ -666,3 +666,57 @@ JSON response
     "customer_id": 1,
     "email": "alice@example.com"
 }
+
+---
+
+## 16. Code-Verified JWT Token Generation — Milestone 7
+
+**Verified on:** 2026-08-13
+
+### Function
+
+`app.auth.create_access_token(user_id)`
+
+### Execution flow
+
+Application
+    ↓
+`create_access_token(1)`
+    ↓
+Read `JWT_SECRET` from environment
+    ↓
+Create JWT payload
+    ↓
+Add subject (`sub`)
+    ↓
+Add expiration (`exp`)
+    ↓
+Sign token using HS256
+    ↓
+Return JWT string
+
+### Verification command
+
+`python -c "from app.auth import create_access_token; print(create_access_token(1))"`
+
+### Verification result
+
+A signed JWT was generated successfully.
+
+No insecure-key warning was produced after replacing the hardcoded fallback secret with the environment-based secret.
+
+### Security improvement
+
+The application no longer uses a weak hardcoded JWT signing secret.
+
+The signing secret must now be supplied through the `JWT_SECRET` environment variable.
+
+### Current limitation
+
+We have verified token generation, but we have **not yet implemented**:
+
+- User login
+- Password verification
+- JWT validation
+- Protected API endpoints
+- Authorization
