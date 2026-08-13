@@ -2443,3 +2443,62 @@ Current limitation
 The Docker Compose file currently defines the primary and Replica 1, but Replica 2 still needs to be added declaratively to Compose.
 
 The existing manually created Replica 2 should remain running until its Compose definition is added and verified.
+
+---
+
+## 48. Code-Verified Compose-Managed PostgreSQL Topology — Milestone 39
+
+**Verified on:** 2026-08-13
+
+### Docker Compose services
+
+```text
+secure-data-postgres
+    PostgreSQL Primary
+    Host port: 5432
+
+secure-data-postgres-replica1
+    PostgreSQL Replica 1
+    Host port: 5433
+
+secure-data-postgres-replica2
+    PostgreSQL Replica 2
+    Host port: 5434
+Verification
+
+Command:
+
+docker compose ps
+
+Result:
+
+secure-data-postgres            Up
+secure-data-postgres-replica1   Up
+secure-data-postgres-replica2   Up
+Replication verification
+
+The primary reported two active WAL streaming connections:
+
+172.30.0.2 → streaming → async
+172.30.0.4 → streaming → async
+Architecture result
+
+The PostgreSQL primary and both replicas are now managed by the project's Docker Compose configuration.
+
+All three services use the deterministic Docker network:
+
+secure-data-project_secure_data_network
+
+with subnet:
+
+172.30.0.0/16
+
+Availability result
+
+The project now has a reproducible local PostgreSQL topology consisting of one primary and two streaming replicas.
+
+Current limitation
+
+The database replication is asynchronous.
+
+The project does not yet implement automatic PostgreSQL promotion/election if the primary database itself fails. Application-level failover has been implemented separately.
