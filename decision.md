@@ -1394,3 +1394,65 @@ Code impact
 Each customer data node will eventually connect to its own PostgreSQL instance rather than sharing a single database connection.
 
 The primary database will stream changes to the replica databases.
+
+---
+
+## 2026-08-13 — Use structured application audit logging
+
+**Decision**
+
+Use Python's standard `logging` module for the initial audit-logging implementation, with structured security-relevant events emitted by the application.
+
+**Why this approach**
+
+The project needs an auditable record of authentication, authorization, access-key, data-access, and failover events.
+
+Python's standard logging framework provides a reliable starting point without adding another dependency to the prototype.
+
+**Events to record**
+
+- Successful login
+- Failed login
+- Access-key issuance
+- Invalid or expired access-key use
+- Authorization denial
+- Successful customer-data access
+- Node failover
+- Data-node errors
+
+**Alternatives considered**
+
+- Store audit events only in PostgreSQL — useful for durable querying, but creates database coupling for the first logging milestone.
+- Use a third-party logging platform immediately — unnecessary complexity for the local prototype.
+- Print events with `print()` — rejected because it lacks logging levels, handlers, formatting, and proper application logging behavior.
+
+**Libraries / technologies involved**
+
+- Python `logging`
+- FastAPI application
+
+**Why this technology**
+
+The standard logging module is already available in Python, supports log levels and handlers, and is sufficient for the first implementation.
+
+**Security impact**
+
+Positive because security-sensitive actions become observable and reviewable.
+
+Audit logs must not contain passwords, JWT secrets, access-key values, encryption keys, or other sensitive secrets.
+
+**Trade-offs / risks**
+
+Application logs are not automatically durable or centralized. Production deployment would require protected log storage, rotation, retention, and possibly centralized collection.
+
+**Files changed**
+
+- `decision.md`
+
+**Code impact**
+
+Security-sensitive application paths will emit structured audit events.
+
+**Follow-up**
+
+Create an audit-logging module and verify that successful and denied security events are recorded without logging sensitive secrets.
