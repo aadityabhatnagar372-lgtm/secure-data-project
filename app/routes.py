@@ -9,7 +9,7 @@ from app.access_key_store import get_access_key, store_access_key
 from app.auth import get_current_user
 from app.data_minimizer import build_customer_select
 from app.database import get_connection
-from app.node_directory import get_node_for_data
+from app.node_directory import get_primary_node, get_replica_nodes
 
 router = APIRouter()
 
@@ -31,44 +31,53 @@ def check_customer_access(user_id: int, customer_id: int) -> bool:
 
 
 def request_customer_email_from_node(customer_id: int) -> dict:
-    """Request customer email data from the responsible data node."""
-    node = get_node_for_data("customer")
+    """Request customer email from the primary, then replicas on failure."""
+    primary = get_primary_node("customer")
+    replicas = get_replica_nodes("customer")
 
-    if node is None:
+    nodes = []
+
+    if primary is not None:
+        nodes.append(primary)
+
+    nodes.extend(replicas)
+
+    if not nodes:
         raise HTTPException(
             status_code=503,
-            detail="Customer data node is unavailable",
+            detail="No customer data nodes are configured",
         )
 
-    url = f"http://{node.host}:8001/customer/{customer_id}/email"
+    for node in nodes:
+        url = f"http://{node.host}:{node.port}/customer/{customer_id}/email"
 
-    request = Request(
-        url,
-        headers={"Accept": "application/json"},
-        method="GET",
+        request = Request(
+            url,
+            headers={"Accept": "application/json"},
+            method="GET",
+        )
+
+        try:
+            with urlopen(request, timeout=5) as response:
+                return json.loads(response.read().decode("utf-8"))
+
+        except HTTPError as exc:
+            if exc.code == 404:
+                raise HTTPException(
+                    status_code=404,
+                    detail="Customer not found",
+                )
+
+            # Try the next node for other HTTP errors.
+
+        except URLError:
+            # Primary/replica unavailable; try the next node.
+            continue
+
+    raise HTTPException(
+        status_code=503,
+        detail="All customer data nodes are unavailable",
     )
-
-    try:
-        with urlopen(request, timeout=5) as response:
-            return json.loads(response.read().decode("utf-8"))
-
-    except HTTPError as exc:
-        if exc.code == 404:
-            raise HTTPException(
-                status_code=404,
-                detail="Customer not found",
-            )
-
-        raise HTTPException(
-            status_code=502,
-            detail="Customer data node returned an error",
-        )
-
-    except URLError:
-        raise HTTPException(
-            status_code=503,
-            detail="Customer data node is unavailable",
-        )
 
 
 @router.get("/customer/{customer_id}/email")
