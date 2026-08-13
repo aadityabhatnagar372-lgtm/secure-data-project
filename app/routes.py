@@ -8,6 +8,8 @@ from app.auth import get_current_user
 from app.data_minimizer import build_customer_select
 from app.database import get_connection
 from app.node_directory import get_node_for_data
+from app.access_key import AccessKeyRequest, generate_access_key
+from app.access_key_store import store_access_key
 
 router = APIRouter()
 
@@ -83,3 +85,29 @@ def get_customer_email(
     build_customer_select("email")
 
     return request_customer_email_from_node(customer_id)
+
+@router.post("/access-key")
+def issue_access_key(
+    request: AccessKeyRequest,
+    current_user_id: int = Depends(get_current_user),
+):
+    if not check_customer_access(current_user_id, request.customer_id):
+        raise HTTPException(
+            status_code=403,
+            detail="You are not authorized to access this customer",
+        )
+
+    key = generate_access_key(
+        user_id=current_user_id,
+        customer_id=request.customer_id,
+        field=request.field,
+    )
+
+    store_access_key(key)
+
+    return {
+        "access_key": key["token"],
+        "customer_id": key["customer_id"],
+        "field": key["field"],
+        "expires_at": key["expires_at"],
+    }
