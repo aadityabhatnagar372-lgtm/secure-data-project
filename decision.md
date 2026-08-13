@@ -1280,3 +1280,50 @@ The customer-data workflow will gain a separate temporary authorization step bef
 **Follow-up**
 
 Implement issuance and validation of the access key in the customer-data workflow and verify that an expired or incorrectly scoped key is rejected.
+
+---
+
+## 2026-08-13 — Use explicit primary and replica routing for initial failover
+
+**Decision**
+
+Represent a primary data node and one or more replica nodes in the node directory and use explicit failover logic when the primary node is unavailable.
+
+**Why this approach**
+
+The project needs to demonstrate that failure of one data node does not automatically stop data access. Explicit primary/replica metadata makes the failover decision visible and testable in the prototype.
+
+**Alternatives considered**
+
+- No failover — simpler, but violates the availability goal of the distributed architecture.
+- Randomly select any node — does not distinguish the authoritative node from replicas.
+- Full PostgreSQL replication immediately — realistic, but adds substantial database configuration complexity before the application-level failover behavior is verified.
+
+**Libraries / technologies involved**
+
+- Python
+- FastAPI
+- PostgreSQL
+- Docker
+
+**Security impact**
+
+Failover must preserve the same authentication, authorization, data-minimization, and access-key requirements. A replica must not become a bypass around existing security controls.
+
+**Trade-offs / risks**
+
+Application-level failover does not itself guarantee that replicas contain current data. Replication consistency must be implemented and verified separately.
+
+**Files changed**
+
+- `decision.md`
+- `app/node_directory.py`
+- Future failover/routing code
+
+**Code impact**
+
+The node directory will represent primary and replica nodes, and the request path will attempt a replica when the primary is unavailable.
+
+**Follow-up**
+
+Implement primary/replica metadata, add failover routing, then simulate primary-node failure and verify that an authorized request can still reach an available replica.
