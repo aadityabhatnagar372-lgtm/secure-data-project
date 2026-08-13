@@ -1085,3 +1085,52 @@ The response still contains only the requested email field.
 Current limitation
 
 Authentication is implemented, but authorization is not.
+
+---
+
+## 24. Code-Verified User-to-Customer Authorization Data — Milestone 15
+
+**Verified on:** 2026-08-13
+
+### Authorization relationship
+
+User:
+
+`testuser`
+
+Customer:
+
+`Customer 1`
+
+Database relationship:
+
+`users.customer_id = 1`
+
+### Verification
+
+Command:
+
+`docker exec secure-data-postgres psql -U secure_user -d secure_data -c "SELECT id, username, customer_id FROM users;"`
+
+### Verification result
+
+```text
+id | username | customer_id
+---+----------+------------
+2  | testuser | 1
+
+Current flow
+
+Authenticated user
+↓
+JWT contains user ID
+↓
+User ID maps to users.customer_id
+↓
+Requested customer ID can be compared
+↓
+Authorization decision
+
+Current limitation
+
+The relationship exists in PostgreSQL, but the FastAPI endpoint does not yet enforce the comparison.
