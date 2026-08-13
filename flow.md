@@ -2819,3 +2819,75 @@ Expired access-key rejection
 User scope validation
 Customer scope validation
 Field scope validation
+
+---
+
+## 56. Code-Verified Real Primary Node Failure and Replica Recovery — Milestone 47
+
+**Verified on:** 2026-08-13
+
+### Failure condition
+
+Customer Node 1 on port `8001` was stopped.
+
+### Protected request
+
+The main API received:
+
+`GET /customer/1/email`
+
+with:
+
+- Valid JWT
+- Valid email-scoped access key
+
+### API result
+
+HTTP status:
+
+`200 OK`
+
+Response:
+
+```json
+{
+    "customer_id": 1,
+    "email": "alice@example.com"
+}
+Replica evidence
+
+Customer Node 2 logged:
+
+GET /customer/1/email HTTP/1.1" 200 OK
+
+Customer Node 3 did not receive the customer-data request.
+
+Verified failover path
+Customer Node 1
+    ↓
+Unavailable
+    ↓
+Main API
+    ↓
+Customer Node 2
+    ↓
+Customer data returned
+    ↓
+200 OK
+Availability result
+
+The running application successfully served an authorized customer-data request after the primary application node was stopped.
+
+This verifies the real application-level primary-to-replica failover path.
+
+Final security result
+
+The failover request still passed through the existing:
+
+JWT authentication
+Access-key validation
+Customer authorization
+Field authorization
+Data-minimization path
+
+before the replica request was made.
