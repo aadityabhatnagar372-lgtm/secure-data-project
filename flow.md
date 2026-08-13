@@ -1421,3 +1421,64 @@ Current limitation
 The main API does not yet call the customer data node.
 
 The main API currently performs the customer-data retrieval itself.
+
+---
+
+## 30. Code-Verified Main API to Customer Node Flow — Milestone 21
+
+**Verified on:** 2026-08-13
+
+### Verified request
+
+`GET /customer/1/email`
+
+### Execution flow
+
+Client
+    ↓
+Main API :8000
+    ↓
+JWT authentication
+    ↓
+Fine-grained authorization
+    ↓
+Node Directory
+    ↓
+HTTP request
+    ↓
+Customer Data Node :8001
+    ↓
+`GET /customer/1/email`
+    ↓
+PostgreSQL
+    ↓
+Customer email
+    ↓
+HTTP response to Main API
+    ↓
+Response to client
+
+### Verification result
+
+Main API returned:
+
+```json
+{
+    "customer_id": 1,
+    "email": "alice@example.com"
+}
+
+Customer Data Node log confirmed:
+
+GET /customer/1/email HTTP/1.1" 200 OK
+Architecture result
+
+The main API successfully retrieved customer data through the separate customer data-node service.
+
+The main API is no longer required to directly perform the customer-data retrieval query.
+
+Current limitation
+
+Only one data node exists.
+
+Node 2 and Node 3, service-to-service authentication, encryption in transit, and failover have not yet been implemented.
