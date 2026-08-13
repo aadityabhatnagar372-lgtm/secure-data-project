@@ -527,3 +527,60 @@ Caller closes the connection
 The connection has been verified, but the application has not yet created any database tables or performed a data query.
 
 The FastAPI request path is also not connected to the database yet.
+
+---
+
+## 13. Code-Verified Customer Data — Milestone 4
+
+**Verified on:** 2026-08-13
+
+### Database object
+
+Table: `customers`
+
+### Fields
+
+- `id`
+- `name`
+- `email`
+- `phone`
+- `address`
+
+### Verification
+
+Command:
+
+`Get-Content app/schema.sql | docker exec -i secure-data-postgres psql -U secure_user -d secure_data`
+
+Result:
+
+- Table created successfully.
+- 3 records inserted successfully.
+
+Command:
+
+`docker exec secure-data-postgres psql -U secure_user -d secure_data -c "SELECT * FROM customers;"`
+
+Result:
+
+- Alice Johnson
+- Bob Smith
+- Charlie Brown
+
+### Current verified data flow
+
+Application / SQL script
+    ↓
+Docker PostgreSQL container
+    ↓
+`secure_data` database
+    ↓
+`customers` table
+    ↓
+3 development records
+
+### Current limitation
+
+The FastAPI API still does not query this table.
+
+The next implementation will connect an API endpoint to this data and demonstrate retrieving only one requested field.
