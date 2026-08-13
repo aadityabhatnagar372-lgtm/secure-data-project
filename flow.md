@@ -2620,3 +2620,40 @@ Audit logging is now integrated into important protected-data workflows without 
 Current limitation
 
 Node failover events and data-node errors are not yet explicitly logged.
+
+---
+
+## 52. Code-Verified Node Failover Audit Logging — Milestone 43
+
+**Verified on:** 2026-08-13
+
+### Verified audit events
+
+The node-routing layer now records:
+
+- `data_node_error`
+- `data_node_failover_exhausted`
+
+### Verification result
+
+```text
+audit_event=data_node_error details={'node': 'customer-node-1', 'customer_id': 1, 'error': 'connection_error'}
+audit_event=data_node_failover_exhausted details={'customer_id': 1, 'attempted_nodes': ['customer-node-1', 'customer-node-2', 'customer-node-3']}
+Failover audit test completed
+Security result
+
+Node failures and exhausted failover attempts are now observable through the audit logger.
+
+No JWT, access key, password, or encryption key is included in these events.
+
+Current audit coverage
+
+The application now has audit logging for:
+
+Login success
+Login failure
+Access-key issuance
+Authorization denial
+Customer-data access
+Data-node errors
+Failover exhaustion
