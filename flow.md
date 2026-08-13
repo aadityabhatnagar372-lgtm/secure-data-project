@@ -584,3 +584,39 @@ Docker PostgreSQL container
 The FastAPI API still does not query this table.
 
 The next implementation will connect an API endpoint to this data and demonstrate retrieving only one requested field.
+
+---
+
+## 14. Code-Verified Customer Email Endpoint — Milestone 5
+
+**Verified on:** 2026-08-13
+
+### Endpoint
+
+`GET /customer/{customer_id}/email`
+
+### Execution flow
+
+Browser / API client
+    ↓
+HTTP GET request
+    ↓
+`app.main`
+    ↓
+FastAPI router
+    ↓
+`get_customer_email(customer_id)`
+    ↓
+JSON response
+
+### Verified request
+
+`GET /customer/1/email`
+
+### Verified response
+
+```json
+{
+    "customer_id": 1,
+    "email": "placeholder@example.com"
+}
