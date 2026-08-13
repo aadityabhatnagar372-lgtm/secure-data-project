@@ -873,3 +873,65 @@ A reusable data-minimization layer will control which fields can be queried and 
 **Follow-up**
 
 Implement the field allowlist and connect the customer email endpoint to it.
+
+---
+
+## 2026-08-13 — Separate the customer data node from the API
+
+**Decision**
+
+Create a separate customer data service that owns access to the customer PostgreSQL database.
+
+**Why this approach**
+
+The project's core architecture is distributed. The API should not directly access every database node. A separate data service makes the node boundary explicit and allows the system to add additional nodes later.
+
+The flow becomes:
+
+Client
+    ↓
+API
+    ↓
+Node Directory
+    ↓
+Customer Data Node
+    ↓
+Customer PostgreSQL database
+
+**Alternatives considered**
+
+- API connects directly to every PostgreSQL node — simpler, but tightly couples the API to every data store and does not clearly demonstrate independent data nodes.
+- Put all data behind one database service — simpler, but does not demonstrate distributed data ownership.
+- Create three physical servers immediately — unnecessary complexity for the local prototype.
+
+**Libraries / technologies involved**
+
+- FastAPI
+- Docker Compose
+- PostgreSQL
+
+**Why these technologies**
+
+FastAPI provides the data-node service API, Docker Compose lets us run the node independently on the local machine, and PostgreSQL remains the persistent data store.
+
+**Security impact**
+
+Positive when service boundaries are enforced. The customer database should not be directly accessible by the client.
+
+**Trade-offs / risks**
+
+Introducing a separate service increases network communication and deployment complexity. The prototype will initially run all services locally in Docker.
+
+**Files changed**
+
+- `decision.md`
+- `docker-compose.yml`
+- Future customer-node service files
+
+**Code impact**
+
+The customer data service will become the owner of customer-data access, while the main API becomes the request coordinator.
+
+**Follow-up**
+
+Create the customer data-node service and run it as a separate Docker container.
