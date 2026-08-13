@@ -2502,3 +2502,40 @@ Current limitation
 The database replication is asynchronous.
 
 The project does not yet implement automatic PostgreSQL promotion/election if the primary database itself fails. Application-level failover has been implemented separately.
+
+---
+
+## 49. Code-Verified Secure Audit Logging — Milestone 40
+
+**Verified on:** 2026-08-13
+
+### Module
+
+`app/audit.py`
+
+### Function
+
+`audit_event(event, **details)`
+
+### Verification
+
+A `login_success` audit event was generated with normal event details and deliberately supplied sensitive values.
+
+### Verification result
+
+```text
+audit_event=login_success details={'user_id': 2, 'username': 'testuser'}
+Audit test completed
+
+The following sensitive values were intentionally supplied but were not included in the log:
+
+Password
+Access key
+Other configured secret fields
+Security result
+
+The audit logger records security-relevant events while filtering configured sensitive fields from log output.
+
+Current limitation
+
+The audit logger has been verified independently, but security events have not yet been added to the actual login, access-key, authorization, data-access, and failover paths.
