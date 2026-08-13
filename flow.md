@@ -2264,3 +2264,62 @@ Current limitation
 Only Replica 1 has been configured so far.
 
 Replica 2 has not yet been configured for PostgreSQL streaming replication.
+
+---
+
+## 45. Code-Verified PostgreSQL Replica 2 — Milestone 36
+
+**Verified on:** 2026-08-13
+
+### Replica 2
+
+Container:
+
+`secure-data-postgres-replica2`
+
+Host port:
+
+`5434`
+
+### Replication state
+
+Replica 2 reported:
+
+```text
+pg_is_in_recovery() = true
+
+Its WAL receiver reported:
+
+status = streaming
+sender_host = secure-data-postgres
+sender_port = 5432
+Replication test
+
+The record created on the primary:
+
+id = 4
+name = Replication Test
+email = replication@example.com
+
+was successfully retrieved from Replica 2.
+
+Verification result
+Primary
+    ↓
+WAL streaming
+    ├── Replica 1
+    └── Replica 2
+
+Both replicas now contain the replicated test record.
+
+Availability result
+
+The PostgreSQL layer now has:
+
+1 primary
+2 streaming replicas
+Current limitation
+
+The database replicas are running independently, but the Docker Compose configuration has not yet been updated to manage the complete replication topology declaratively.
+
+The application services also still need explicit database-node-to-database mapping.
