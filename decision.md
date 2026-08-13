@@ -283,3 +283,49 @@ No application code yet. This decision defines the database technology for the f
 **Follow-up**
 
 Create the first PostgreSQL Docker service and verify that the application can communicate with it.
+
+---
+
+## 2026-08-13 — Use Psycopg 3 for PostgreSQL access
+
+**Decision**
+
+Use Psycopg 3 as the Python PostgreSQL driver for the first implementation.
+
+**Why this approach**
+
+The project needs precise control over database queries because one of its main goals is to retrieve only the data requested by the user. Psycopg 3 lets the application execute explicit SQL queries without adding an ORM abstraction at this early stage.
+
+**Alternatives considered**
+
+- SQLAlchemy — powerful and useful for larger applications, but adds an additional abstraction layer that is not necessary for the first database implementation.
+- SQLite — simpler, but does not represent the server-based PostgreSQL data-node architecture we are building.
+
+**Libraries / technologies involved**
+
+- Psycopg 3
+- PostgreSQL
+
+**Why this library / technology**
+
+Psycopg 3 provides direct Python access to PostgreSQL and allows the application to explicitly control which columns are selected.
+
+**Security impact**
+
+Direct query control supports the project's data-minimization requirement. Queries will still need parameterization and authorization checks; the database driver alone does not provide those protections.
+
+**Trade-offs / risks**
+
+Using direct SQL means we must carefully handle parameterization, transactions, connection management, and schema changes ourselves.
+
+**Files changed**
+
+- `decision.md`
+
+**Code impact**
+
+No application code yet. This decision selects the database driver for the upcoming FastAPI-to-PostgreSQL integration.
+
+**Follow-up**
+
+Install Psycopg 3 and implement a small database connection layer.
