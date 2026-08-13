@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException
 
 from app.access_key import AccessKeyRequest, generate_access_key
 from app.access_key_store import get_access_key, store_access_key
+from app.audit import audit_event
 from app.auth import get_current_user
 from app.data_minimizer import build_customer_select
 from app.database import get_connection
@@ -68,10 +69,7 @@ def request_customer_email_from_node(customer_id: int) -> dict:
                     detail="Customer not found",
                 )
 
-            # Try the next node for other HTTP errors.
-
         except URLError:
-            # Primary/replica unavailable; try the next node.
             continue
 
     raise HTTPException(
@@ -101,18 +99,36 @@ def get_customer_email(
         )
 
     if stored_key["user_id"] != current_user_id:
+        audit_event(
+            "authorization_denied",
+            user_id=current_user_id,
+            customer_id=customer_id,
+            reason="access_key_user_mismatch",
+        )
         raise HTTPException(
             status_code=403,
             detail="Access key does not belong to the authenticated user",
         )
 
     if stored_key["customer_id"] != customer_id:
+        audit_event(
+            "authorization_denied",
+            user_id=current_user_id,
+            customer_id=customer_id,
+            reason="access_key_customer_mismatch",
+        )
         raise HTTPException(
             status_code=403,
             detail="Access key is not valid for this customer",
         )
 
     if stored_key["field"] != "email":
+        audit_event(
+            "authorization_denied",
+            user_id=current_user_id,
+            customer_id=customer_id,
+            reason="access_key_field_mismatch",
+        )
         raise HTTPException(
             status_code=403,
             detail="Access key is not valid for this field",
@@ -120,7 +136,16 @@ def get_customer_email(
 
     build_customer_select("email")
 
-    return request_customer_email_from_node(customer_id)
+    result = request_customer_email_from_node(customer_id)
+
+    audit_event(
+        "customer_data_access",
+        user_id=current_user_id,
+        customer_id=customer_id,
+        field="email",
+    )
+
+    return result
 
 
 @router.post("/access-key")
@@ -129,6 +154,12 @@ def issue_access_key(
     current_user_id: int = Depends(get_current_user),
 ):
     if not check_customer_access(current_user_id, request.customer_id):
+        audit_event(
+            "authorization_denied",
+            user_id=current_user_id,
+            customer_id=request.customer_id,
+            reason="customer_ownership_check_failed",
+        )
         raise HTTPException(
             status_code=403,
             detail="You are not authorized to access this customer",
@@ -141,6 +172,13 @@ def issue_access_key(
     )
 
     store_access_key(key)
+
+    audit_event(
+        "access_key_issued",
+        user_id=current_user_id,
+        customer_id=request.customer_id,
+        field=request.field,
+    )
 
     return {
         "access_key": key["token"],
