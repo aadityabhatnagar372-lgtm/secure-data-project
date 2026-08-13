@@ -39,45 +39,45 @@ Support distributed data nodes so one node failure does not automatically stop t
 2. Planned High-Level Execution Order
 
 User / Client
-    |
-    v
+|
+v
 API / Request Entry Point
-    |
-    v
+|
+v
 Authentication
-    |
-    v
+|
+v
 Authorization
-    |
-    +---- NO ----> Access Denied
-    |
-   YES
-    |
-    v
+|
++---- NO ----> Access Denied
+|
+YES
+|
+v
 Data / Service Discovery
-    |
-    v
+|
+v
 Data Node
-    |
-    v
+|
+v
 Data Minimization / Exact Query
-    |
-    v
+|
+v
 Encryption + Key Management
-    |
-    v
+|
+v
 10-Minute Access Credential
-    |
-    v
+|
+v
 Response to Client
-    |
-    v
+|
+v
 Client Uses Requested Data
-    |
-    v
+|
+v
 Credential Expiry
-    |
-    v
+|
+v
 New Request -> New Authorization / New Credential
 
 3. Planned Entry Point
@@ -109,22 +109,22 @@ Verified entry point: TO BE FILLED FROM CODE
 The following are conceptual responsibilities, not verified source-code names.
 
 Request Handler
-    |
-    +--> Authenticator
-    |
-    +--> Authorizer
-    |
-    +--> DataDirectory / ServiceDiscovery
-    |         |
-    |         +--> DataNodeClient
-    |
-    +--> DataMinimizer / QueryBuilder
-    |
-    +--> KeyManager
-    |
-    +--> EncryptionService
-    |
-    +--> ResponseBuilder
+|
++--> Authenticator
+|
++--> Authorizer
+|
++--> DataDirectory / ServiceDiscovery
+|         |
+|         +--> DataNodeClient
+|
++--> DataMinimizer / QueryBuilder
+|
++--> KeyManager
+|
++--> EncryptionService
+|
++--> ResponseBuilder
 
 Request Handler
 
@@ -167,42 +167,42 @@ Returns the minimum required response to the client.
 Authentication failure
 
 Request
-  |
-  v
+|
+v
 Authentication
-  |
-  +--> FAIL --> Reject request
+|
++--> FAIL --> Reject request
 
 Authorization failure
 
 Authenticated
-  |
-  v
+|
+v
 Authorization
-  |
-  +--> NOT ALLOWED --> Access denied
+|
++--> NOT ALLOWED --> Access denied
 
 Data node unavailable
 
 Find data node
-  |
-  +--> Node unavailable
-          |
-          v
-    Replica / failover path
+|
++--> Node unavailable
+|
+v
+Replica / failover path
 
 This failover behavior must be implemented explicitly; it is not guaranteed by simply using multiple nodes.
 
 Credential expired
 
 Request/use protected data
-        |
-        v
+|
+v
 Credential validation
-        |
-        +--> Expired --> Reject
-        |
-        +--> Valid --> Continue
+|
++--> Expired --> Reject
+|
++--> Valid --> Continue
 
 6. What AI Changed in This Session
 
@@ -316,28 +316,28 @@ Entry point: app/main.py
 
 Runtime command:
 
-python -m uvicorn app.main:app --reload
+python -m uvicorn app.main --reload
 
 Execution order:
 
 Uvicorn process
-    ↓
-Imports `app.main`
-    ↓
-Creates the FastAPI `app` object
-    ↓
+↓
+Imports app.main
+↓
+Creates the FastAPI app object
+↓
 Registers HTTP routes
-    ↓
+↓
 Browser/Postman sends request
-    ↓
+↓
 FastAPI matches the route
-    ↓
-`root()` or `health_check()` executes
-    ↓
+↓
+root() or health_check() executes
+↓
 Python dictionary is returned
-    ↓
+↓
 FastAPI serializes it as JSON
-    ↓
+↓
 HTTP response is returned to the client
 
 Verified functions
@@ -382,69 +382,73 @@ Current limitation: No authentication, authorization, database, encryption, temp
 
 ## 10. Planned Data Access Flow — PostgreSQL Node
 
-**Status:** Planned — not yet implemented.
+Status: Planned — not yet implemented.
 
 The first database-backed request is planned to follow this flow:
 
 User / Client
-    |
-    v
+|
+v
 FastAPI API
-    |
-    v
+|
+v
 Request validation
-    |
-    v
+|
+v
 Data access layer
-    |
-    v
+|
+v
 PostgreSQL Data Node
-    |
-    v
+|
+v
 Retrieve only requested field
-    |
-    v
+|
+v
 Return minimal response to client
 
 ### Planned Example
 
 Request:
 
-`GET /customer/101/email`
+GET /customer/101/email
 
 Expected behavior:
 
 1. FastAPI receives the request.
+
 2. The application validates the requested customer and field.
+
 3. The data access layer queries PostgreSQL.
-4. The query retrieves only the `email` field.
+
+4. The query retrieves only the email field.
+
 5. The application returns only the requested email.
 
 ### Important limitation
 
-This flow is **planned only**. PostgreSQL has not yet been connected to the application, so no database call is currently verified.
+This flow is planned only. PostgreSQL has not yet been connected to the application, so no database call is currently verified.
 
 ---
 
 ## 11. Code-Verified PostgreSQL Node — Milestone 2
 
-**Verified on:** 2026-08-13
+Verified on: 2026-08-13
 
 ### Docker service
 
-Service: `postgres`
+Service: postgres
 
-Container: `secure-data-postgres`
+Container: secure-data-postgres
 
-Image: `postgres:17`
+Image: postgres:17
 
-Port: `5432`
+Port: 5432
 
 ### Verification
 
 Command:
 
-`docker compose up -d`
+docker compose up -d
 
 Result:
 
@@ -452,33 +456,35 @@ PostgreSQL container started successfully.
 
 Command:
 
-`docker ps`
+docker ps
 
 Result:
 
-`secure-data-postgres` is running and exposing port `5432`.
+secure-data-postgres is running and exposing port 5432.
 
 Command:
 
-`docker exec secure-data-postgres pg_isready -U secure_user -d secure_data`
+docker exec secure-data-postgres pg_isready -U secure_user -d secure_data
 
 Result:
 
-`/var/run/postgresql:5432 - accepting connections`
+/var/run/postgresql:5432 - accepting connections
 
 ### Current verified flow
 
 Docker Compose
-    ↓
+
+↓
+
 PostgreSQL container
-    ↓
-Database `secure_data`
-    ↓
+↓
+Database secure_data
+↓
 PostgreSQL accepts connections
 
 ### Current limitation
 
-The FastAPI application is **not connected to PostgreSQL yet**.
+The FastAPI application is not connected to PostgreSQL yet.
 
 No application-level database query has been implemented or verified.
 
@@ -486,41 +492,41 @@ No application-level database query has been implemented or verified.
 
 ## 12. Code-Verified PostgreSQL Connection — Milestone 3
 
-**Verified on:** 2026-08-13
+Verified on: 2026-08-13
 
 ### Entry point
 
-`app/database.py`
+app/database.py
 
 ### Function
 
-`get_connection()`
+get_connection()
 
 ### Execution flow
 
 Python application
-    ↓
-Imports `app.database`
-    ↓
-Calls `get_connection()`
-    ↓
+↓
+Imports app.database
+↓
+Calls get_connection()
+↓
 Reads database configuration
-    ↓
+↓
 Psycopg 3 creates PostgreSQL connection
-    ↓
+↓
 PostgreSQL accepts connection
-    ↓
+↓
 Connection is returned to the caller
-    ↓
+↓
 Caller closes the connection
 
 ### Verification command
 
-`python -c "from app.database import get_connection; conn = get_connection(); print('Database connection successful'); conn.close()"`
+python -c "from app.database import get_connection; conn = get_connection(); print('Database connection successful'); conn.close()"
 
 ### Verification result
 
-`Database connection successful`
+Database connection successful
 
 ### Current limitation
 
@@ -532,51 +538,58 @@ The FastAPI request path is also not connected to the database yet.
 
 ## 13. Code-Verified Customer Data — Milestone 4
 
-**Verified on:** 2026-08-13
+Verified on: 2026-08-13
 
 ### Database object
 
-Table: `customers`
+Table: customers
 
 ### Fields
 
-- `id`
-- `name`
-- `email`
-- `phone`
-- `address`
+id
+
+name
+
+email
+
+phone
+
+address
 
 ### Verification
 
 Command:
 
-`Get-Content app/schema.sql | docker exec -i secure-data-postgres psql -U secure_user -d secure_data`
+Get-Content app/schema.sql | docker exec -i secure-data-postgres psql -U secure_user -d secure_data
 
 Result:
 
-- Table created successfully.
-- 3 records inserted successfully.
+Table created successfully.
+
+3 records inserted successfully.
 
 Command:
 
-`docker exec secure-data-postgres psql -U secure_user -d secure_data -c "SELECT * FROM customers;"`
+docker exec secure-data-postgres psql -U secure_user -d secure_data -c "SELECT * FROM customers;"
 
 Result:
 
-- Alice Johnson
-- Bob Smith
-- Charlie Brown
+Alice Johnson
+
+Bob Smith
+
+Charlie Brown
 
 ### Current verified data flow
 
 Application / SQL script
-    ↓
+↓
 Docker PostgreSQL container
-    ↓
-`secure_data` database
-    ↓
-`customers` table
-    ↓
+↓
+secure_data database
+↓
+customers table
+↓
 3 development records
 
 ### Current limitation
@@ -589,47 +602,44 @@ The next implementation will connect an API endpoint to this data and demonstrat
 
 ## 14. Code-Verified Customer Email Endpoint — Milestone 5
 
-**Verified on:** 2026-08-13
+Verified on: 2026-08-13
 
 ### Endpoint
 
-`GET /customer/{customer_id}/email`
+GET /customer/{customer_id}/email
 
 ### Execution flow
 
 Browser / API client
-    ↓
+↓
 HTTP GET request
-    ↓
-`app.main`
-    ↓
+↓
+app.main
+↓
 FastAPI router
-    ↓
-`get_customer_email(customer_id)`
-    ↓
+↓
+get_customer_email(customer_id)
+↓
 JSON response
 
 ### Verified request
 
-`GET /customer/1/email`
+GET /customer/1/email
 
 ### Verified response
 
-```json
 {
     "customer_id": 1,
     "email": "placeholder@example.com"
 }
-
 ---
-
 ## 15. Code-Verified Database-Backed Customer Email Endpoint — Milestone 6
 
 **Verified on:** 2026-08-13
 
 ### Endpoint
 
-`GET /customer/{customer_id}/email`
+`GET /customer/{*customer_id*}/email`
 
 ### Execution flow
 
@@ -666,9 +676,7 @@ JSON response
     "customer_id": 1,
     "email": "alice@example.com"
 }
-
 ---
-
 ## 16. Code-Verified JWT Token Generation — Milestone 7
 
 **Verified on:** 2026-08-13
@@ -720,9 +728,7 @@ We have verified token generation, but we have **not yet implemented**:
 - JWT validation
 - Protected API endpoints
 - Authorization
-
 ---
-
 ## 17. Code-Verified Users Table — Milestone 8
 
 **Verified on:** 2026-08-13
@@ -749,7 +755,7 @@ Result:
 
 Command:
 
-`docker exec secure-data-postgres psql -U secure_user -d secure_data -c "\d users"`
+`docker exec secure-data-postgres psql -U secure_user -d secure_data -c "*\d* users"`
 
 Result:
 
@@ -773,9 +779,7 @@ Username + password hash can be stored
 No user record has been created yet.
 
 Password hashing and login verification have not yet been connected to this table.
-
 ---
-
 ## 18. Code-Verified Argon2 Password Hashing — Milestone 9
 
 **Verified on:** 2026-08-13
@@ -823,9 +827,7 @@ Passwords are hashed before storage and are not stored as plaintext.
 ### Current limitation
 
 Password hashing is verified, but it has not yet been connected to the `users` table or login endpoint.
-
 ---
-
 ## 19. Code-Verified Development User — Milestone 10
 
 **Verified on:** 2026-08-13
@@ -872,9 +874,7 @@ The development password is known only for local testing. It must not be reused 
 The login endpoint has not yet been implemented.
 
 The application still does not retrieve the user record and verify the submitted password during an API login request.
-
 ---
-
 ## 20. Code-Verified Login Endpoint Structure — Milestone 11
 
 **Verified on:** 2026-08-13
@@ -922,9 +922,7 @@ The endpoint currently does **not**:
 ### Next implementation
 
 Connect the login function to PostgreSQL and verify the submitted password using the existing Argon2 password-verification function.
-
 ---
-
 ## 21. Code-Verified Database-Backed JWT Login — Milestone 12
 
 **Verified on:** 2026-08-13
@@ -961,39 +959,37 @@ Return bearer access token
     "password": "TestPassword123!"
 }
 
-Verification result
+### Verification result
 
 HTTP status: 200
 
 Response contains:
 
 {
-    "access_token": "<signed JWT>",
+    "access_token": "\<signed JWT>",
     "token_type": "bearer"
 }
-Security result
+### Security result
 Password was verified against the stored Argon2 hash.
 The plaintext password was not returned.
 A signed JWT was generated only after successful authentication.
-Current limitation
+### Current limitation
 
 The JWT is currently issued but is not yet required to access the customer data endpoint.
 
-The next step is JWT validation and protecting /customer/{customer_id}/email.
-
+The next step is JWT validation and protecting /customer/{*customer_id*}/email.
 ---
-
 ## 22. Code-Verified Protected Customer Endpoint — Milestone 13
 
 **Verified on:** 2026-08-13
 
 ### Endpoint
 
-`GET /customer/{customer_id}/email`
+`GET /customer/{*customer_id*}/email`
 
 ### Test
 
-A request was made without an `Authorization: Bearer <JWT>` header.
+A request was made without an `Authorization: Bearer \<JWT>` header.
 
 ### Execution flow
 
@@ -1018,29 +1014,27 @@ Response:
     "detail": "Not authenticated"
 }
 
-Security result
+### Security result
 
 Unauthenticated clients cannot reach the customer-data query.
 
-Current limitation
+### Current limitation
 
 A valid JWT is now required, but the system does not yet check whether the authenticated user is authorized to access the requested customer data.
-
 ---
-
 ## 23. Code-Verified Authenticated Customer Data Request — Milestone 14
 
 **Verified on:** 2026-08-13
 
 ### Endpoint
 
-`GET /customer/{customer_id}/email`
+`GET /customer/{*customer_id*}/email`
 
 ### Verification
 
 A valid JWT obtained from `POST /login` was supplied as:
 
-`Authorization: Bearer <JWT>`
+`Authorization: Bearer \<JWT>`
 
 ### Execution flow
 
@@ -1078,16 +1072,14 @@ Response:
     "email": "alice@example.com"
 }
 
-Security result
+### Security result
 Requests without a JWT are rejected.
 Requests with a valid JWT can reach the protected endpoint.
 The response still contains only the requested email field.
-Current limitation
+### Current limitation
 
 Authentication is implemented, but authorization is not.
-
 ---
-
 ## 24. Code-Verified User-to-Customer Authorization Data — Milestone 15
 
 **Verified on:** 2026-08-13
@@ -1119,7 +1111,7 @@ id | username | customer_id
 ---+----------+------------
 2  | testuser | 1
 
-Current flow
+### Current flow
 
 Authenticated user
 ↓
@@ -1131,12 +1123,10 @@ Requested customer ID can be compared
 ↓
 Authorization decision
 
-Current limitation
+### Current limitation
 
 The relationship exists in PostgreSQL, but the FastAPI endpoint does not yet enforce the comparison.
-
 ---
-
 ## 25. Code-Verified Fine-Grained Authorization — Milestone 16
 
 **Verified on:** 2026-08-13
@@ -1171,7 +1161,7 @@ Response:
 {
     "detail": "You are not authorized to access this customer"
 }
-Execution flow
+### Execution flow
 
 JWT
 ↓
@@ -1186,18 +1176,16 @@ No match → 403 Forbidden
 ↓
 Only authorized customer data can be queried
 
-Security result
+### Security result
 
 A valid authentication token is not sufficient to access arbitrary customer data.
 
 The server performs an additional authorization check before executing the customer-data query.
 
-Current limitation
+### Current limitation
 
 The authorization model currently uses simple user-to-customer ownership.
-
 ---
-
 ## 26. Code-Verified Data Node Directory — Milestone 17
 
 **Verified on:** 2026-08-13
@@ -1223,7 +1211,7 @@ Command:
 ```text
 DataNode(name='customer-node-1', host='localhost', port=5432)
 customer-node-1 localhost 5432
-Current verified flow
+### Current verified flow
 
 Requested data type
 ↓
@@ -1235,20 +1223,18 @@ customer-node-1
 ↓
 localhost:5432
 
-Security result
+### Security result
 
 The directory contains only routing metadata.
 
 It does not contain the customer's actual data.
 
-Current limitation
+### Current limitation
 
 The customer API does not yet use the node directory to locate its database.
 
 The current implementation still connects directly using the existing database configuration.
-
 ---
-
 ## 27. Code-Verified Data Minimization Layer — Milestone 18
 
 **Verified on:** 2026-08-13
@@ -1288,7 +1274,7 @@ ValueError: Field 'password_hash' is not available for access.
 
 The sensitive field was rejected because it is not present in the allowlist.
 
-Current verified flow
+### Current verified flow
 
 Requested field
 ↓
@@ -1302,16 +1288,14 @@ build_customer_select()
 ↓
 Generate query for only the requested field
 
-Security result
+### Security result
 
 The data-minimization layer prevents arbitrary field selection and prevents password_hash from being requested through this component.
 
-Current limitation
+### Current limitation
 
 The customer API endpoint still contains its own SQL query and does not yet use build_customer_select().
-
 ---
-
 ## 28. Code-Verified Customer Data Node — Milestone 19
 
 **Verified on:** 2026-08-13
@@ -1343,7 +1327,7 @@ Command:
 }
 Current verified architecture
 
-Main API
+### Main API
 ↓
 Customer Data Node
 ↓
@@ -1355,21 +1339,19 @@ The customer data node now runs as a separate application process from the main 
 
 This establishes the first explicit service boundary in the distributed architecture.
 
-Current limitation
+### Current limitation
 
 The customer data node does not yet own or query the PostgreSQL customer data.
 
 The main API still performs the customer database query directly.
-
 ---
-
 ## 29. Code-Verified Customer Data Node Retrieval — Milestone 20
 
 **Verified on:** 2026-08-13
 
 ### Endpoint
 
-`GET /customer/{customer_id}/email`
+`GET /customer/{*customer_id*}/email`
 
 ### Service
 
@@ -1392,7 +1374,7 @@ Result:
     "customer_id": 1,
     "email": "alice@example.com"
 }
-Execution flow
+### Execution flow
 
 Client / Service
 ↓
@@ -1406,9 +1388,9 @@ SELECT email FROM customers WHERE id = %s
 ↓
 Email returned
 
-Current architecture
+### Current architecture
 
-Main API
+### Main API
 ↓
 Node Directory
 ↓
@@ -1416,14 +1398,12 @@ Customer Data Node :8001
 ↓
 PostgreSQL
 
-Current limitation
+### Current limitation
 
 The main API does not yet call the customer data node.
 
 The main API currently performs the customer-data retrieval itself.
-
 ---
-
 ## 30. Code-Verified Main API to Customer Node Flow — Milestone 21
 
 **Verified on:** 2026-08-13
@@ -1471,20 +1451,18 @@ Main API returned:
 Customer Data Node log confirmed:
 
 GET /customer/1/email HTTP/1.1" 200 OK
-Architecture result
+### Architecture result
 
 The main API successfully retrieved customer data through the separate customer data-node service.
 
 The main API is no longer required to directly perform the customer-data retrieval query.
 
-Current limitation
+### Current limitation
 
 Only one data node exists.
 
 Node 2 and Node 3, service-to-service authentication, encryption in transit, and failover have not yet been implemented.
-
 ---
-
 ## 31. Code-Verified Customer Data Node 2 — Milestone 22
 
 **Verified on:** 2026-08-13
@@ -1524,18 +1502,16 @@ Customer Node 2
 ↓
 127.0.0.1:8002
 
-Architecture result
+### Architecture result
 
 Two independent customer data-node services can run simultaneously on separate ports.
 
-Current limitation
+### Current limitation
 
 Node 2 currently provides only a health endpoint.
 
 It is not yet connected to customer data or used by the node directory for request routing.
-
 ---
-
 ## 32. Code-Verified Customer Data Node 3 — Milestone 23
 
 **Verified on:** 2026-08-13
@@ -1579,20 +1555,18 @@ Customer Node 3
 ↓
 127.0.0.1:8003
 
-Architecture result
+### Architecture result
 
 Three independent customer data-node services can now run simultaneously on separate ports.
 
-Current limitation
+### Current limitation
 
 Only Node 1 currently serves customer data.
 
 Nodes 2 and 3 currently provide health endpoints only.
 
 The node directory does not yet route requests between all three nodes.
-
 ---
-
 ## 33. Code-Verified Fernet Encryption — Milestone 24
 
 **Verified on:** 2026-08-13
@@ -1621,7 +1595,7 @@ Decryption returned the original plaintext.
 
 ```text
 Decryption successful: True
-Current verified flow
+### Current verified flow
 
 Plaintext data
 ↓
@@ -1633,18 +1607,16 @@ decrypt_data()
 ↓
 Original plaintext
 
-Security result
+### Security result
 
 The encryption key is supplied through the ENCRYPTION_KEY environment variable rather than being hardcoded in source code.
 
 The round-trip test confirms that encrypted data can be recovered with the correct key.
 
-Current limitation
+### Current limitation
 
 The encryption service is not yet integrated into the customer-data request flow.
-
 ---
-
 ## 34. Code-Verified 10-Minute Access Key Generation — Milestone 25
 
 **Verified on:** 2026-08-13
@@ -1706,9 +1678,7 @@ It is not yet stored, validated, used to access data, or rejected after expirati
 ### Next step
 
 Implement access-key storage and validation so expired or incorrectly scoped keys cannot be used.
-
 ---
-
 ## 35. Code-Verified Access Key Storage and Expiry — Milestone 26
 
 **Verified on:** 2026-08-13
@@ -1745,7 +1715,7 @@ After validation: None
 
 The expired key was rejected and removed from the in-memory store.
 
-Current verified flow
+### Current verified flow
 
 Generate access key
 ↓
@@ -1759,22 +1729,20 @@ Check expiration
 ├── Valid → return scoped access record
 └── Expired → remove and reject
 
-Security result
+### Security result
 
 The access-key store now enforces server-side expiration.
 
 A key cannot be retrieved from the store after its expiration time.
 
-Current limitation
+### Current limitation
 
 The access key is not yet connected to the customer-data request flow.
 
 The application does not yet require this 10-minute key before returning protected data.
 
 The store is also in-memory, so it is not shared between multiple API processes or nodes.
-
 ---
-
 ## 36. Code-Verified Scoped Access-Key Issuance — Milestone 27
 
 **Verified on:** 2026-08-13
@@ -1793,7 +1761,7 @@ The store is also in-memory, so it is not shared between multiple API processes 
 
 A valid JWT was supplied with the request.
 
-Verification result
+### Verification result
 
 HTTP status: 200
 
@@ -1820,18 +1788,16 @@ Store access key
 ↓
 Return token and expiration
 
-Security result
+### Security result
 
 The temporary access key is issued only after the authenticated user passes the customer authorization check.
 
 The key is scoped to the requested customer and field and has a 10-minute expiration.
 
-Current limitation
+### Current limitation
 
 The customer-data endpoint does not yet require the issued access key.
-
 ---
-
 ## 37. Code-Verified Access-Key Enforcement — Milestone 28
 
 **Verified on:** 2026-08-13
@@ -1856,7 +1822,7 @@ Response:
 {
     "detail": "Access key is required"
 }
-Security result
+### Security result
 
 A valid JWT alone is no longer sufficient to retrieve customer data.
 
@@ -1864,7 +1830,7 @@ The protected data endpoint now requires both:
 
 JWT authentication
 A valid scoped access key
-Current flow
+### Current flow
 
 JWT
 ↓
@@ -1878,7 +1844,7 @@ Validate scope
 ↓
 Retrieve customer data
 
-Current limitation
+### Current limitation
 
 We have verified that the access key is required, but we still need to verify:
 
@@ -1887,9 +1853,7 @@ wrong customer → rejected
 wrong user → rejected
 wrong field → rejected
 expired access key → rejected
-
 ---
-
 ## 38. Code-Verified Temporary Access-Key Data Retrieval — Milestone 29
 
 **Verified on:** 2026-08-13
@@ -1953,13 +1917,13 @@ Customer Data Node
 ↓
 Return customer email
 
-Security result
+### Security result
 
 The customer-data endpoint now requires both authentication and a valid short-lived scoped access key.
 
 The access key limits access to the authorized user, customer, and field and expires after 10 minutes.
 
-Current limitation
+### Current limitation
 
 The valid-key path is verified.
 
@@ -1971,9 +1935,7 @@ Wrong field
 Expired key
 
 These tests should be completed before marking the access-key integration fully tested.
-
 ---
-
 ## 39. Code-Verified Access-Key Customer Scope — Milestone 30
 
 **Verified on:** 2026-08-13
@@ -2003,7 +1965,7 @@ Response:
 {
     "detail": "Access key is not valid for this customer"
 }
-Security result
+### Security result
 
 An access key cannot be reused to access a different customer from the customer for which it was issued.
 
@@ -2014,9 +1976,7 @@ Access-key existence
 Access-key expiration
 User scope
 Customer scope
-
 ---
-
 ## 40. Code-Verified Access-Key Field Scope — Milestone 31
 
 **Verified on:** 2026-08-13
@@ -2046,7 +2006,7 @@ Response:
 {
     "detail": "Access key is not valid for this field"
 }
-Security result
+### Security result
 
 An access key scoped to one field cannot be reused to access a different field.
 
@@ -2056,9 +2016,7 @@ Token expiration
 User scope
 Customer scope
 Field scope
-
 ---
-
 ## 41. Code-Verified Access-Key Expiration — Milestone 32
 
 **Verified on:** 2026-08-13
@@ -2074,7 +2032,7 @@ Expired key result: None
 
 The expired key was rejected by get_access_key().
 
-Security result
+### Security result
 
 Expired access keys cannot be retrieved from the access-key store and therefore cannot be used for protected data access.
 
@@ -2084,12 +2042,10 @@ Token existence
 User scope
 Customer scope
 Field scope
-Current limitation
+### Current limitation
 
 Expiration has been verified at the access-key store level.
-
 ---
-
 ## 42. Code-Verified Primary and Replica Node Directory — Milestone 33
 
 **Verified on:** 2026-08-13
@@ -2131,7 +2087,7 @@ DataNode(
     port=8003,
     role='replica'
 )
-Current architecture
+### Current architecture
 
 Customer data
 ↓
@@ -2145,14 +2101,12 @@ Security / availability result
 
 The directory now explicitly identifies the primary node and replica nodes, providing the metadata required for an explicit failover path.
 
-Current limitation
+### Current limitation
 
 The replicas are metadata entries only.
 
 Actual customer-data replication has not yet been implemented, and the request flow does not yet automatically fail over to a replica when the primary is unavailable.
-
 ---
-
 ## 43. Code-Verified Primary-to-Replica Failover — Milestone 34
 
 **Verified on:** 2026-08-13
@@ -2189,7 +2143,7 @@ Customer Node 2 log confirmed:
 GET /customer/1/email HTTP/1.1" 200 OK
 Verified flow
 
-Main API
+### Main API
 ↓
 Primary Node 1 unavailable
 ↓
@@ -2199,18 +2153,16 @@ Customer data retrieved
 ↓
 HTTP 200 returned to client
 
-Availability result
+### Availability result
 
 The main API can continue serving an authorized request when the primary application node is unavailable.
 
-Current limitation
+### Current limitation
 
 The current implementation demonstrates application-level service failover.
 
 Node 2 and Node 3 currently use the same PostgreSQL data source, so independent database replication has not yet been implemented.
-
 ---
-
 ## 44. Code-Verified PostgreSQL Streaming Replication — Milestone 35
 
 **Verified on:** 2026-08-13
@@ -2235,7 +2187,7 @@ sender_port = 5432
 Replica 1 also reported:
 
 pg_is_in_recovery() = true
-Replication test
+### Replication test
 
 A new customer record was inserted into the primary:
 
@@ -2245,7 +2197,7 @@ email = replication@example.com
 
 The same record was then queried from Replica 1 and returned successfully.
 
-Verification result
+### Verification result
 Primary
     ↓
 WAL streaming replication
@@ -2259,14 +2211,12 @@ The first independent PostgreSQL replica is now receiving changes from the prima
 
 This provides actual database-level redundancy in addition to the previously implemented application-level failover.
 
-Current limitation
+### Current limitation
 
 Only Replica 1 has been configured so far.
 
 Replica 2 has not yet been configured for PostgreSQL streaming replication.
-
 ---
-
 ## 45. Code-Verified PostgreSQL Replica 2 — Milestone 36
 
 **Verified on:** 2026-08-13
@@ -2293,7 +2243,7 @@ Its WAL receiver reported:
 status = streaming
 sender_host = secure-data-postgres
 sender_port = 5432
-Replication test
+### Replication test
 
 The record created on the primary:
 
@@ -2303,7 +2253,7 @@ email = replication@example.com
 
 was successfully retrieved from Replica 2.
 
-Verification result
+### Verification result
 Primary
     ↓
 WAL streaming
@@ -2312,20 +2262,18 @@ WAL streaming
 
 Both replicas now contain the replicated test record.
 
-Availability result
+### Availability result
 
 The PostgreSQL layer now has:
 
 1 primary
 2 streaming replicas
-Current limitation
+### Current limitation
 
 The database replicas are running independently, but the Docker Compose configuration has not yet been updated to manage the complete replication topology declaratively.
 
 The application services also still need explicit database-node-to-database mapping.
-
 ---
-
 ## 46. Code-Verified Dual PostgreSQL Replication Streams — Milestone 37
 
 **Verified on:** 2026-08-13
@@ -2349,14 +2297,14 @@ Interpretation
 Replica 1 is actively streaming from the primary.
 Replica 2 is actively streaming from the primary.
 Both replicas are asynchronous standbys.
-Current architecture
+### Current architecture
 
 PostgreSQL Primary
 ↓ WAL streaming
 ├── PostgreSQL Replica 1
 └── PostgreSQL Replica 2
 
-Availability result
+### Availability result
 
 The PostgreSQL layer now has two active streaming replicas.
 
@@ -2364,12 +2312,10 @@ Combined with the application-level failover routing, the system has both:
 
 database-level replication
 application-level replica failover
-Current limitation
+### Current limitation
 
 The replication topology is currently created manually with Docker commands.
-
 ---
-
 ## 47. Code-Verified Dual PostgreSQL Replica Topology — Milestone 38
 
 **Verified on:** 2026-08-13
@@ -2430,7 +2376,7 @@ Verified architecture
         172.30.0.2         172.30.0.4
              │                 │
              └──── replicated data ────┘
-Availability result
+### Availability result
 
 The system now has:
 
@@ -2438,14 +2384,12 @@ one PostgreSQL primary
 two PostgreSQL streaming replicas
 verified data replication to both replicas
 application-level failover routing
-Current limitation
+### Current limitation
 
 The Docker Compose file currently defines the primary and Replica 1, but Replica 2 still needs to be added declaratively to Compose.
 
 The existing manually created Replica 2 should remain running until its Compose definition is added and verified.
-
 ---
-
 ## 48. Code-Verified Compose-Managed PostgreSQL Topology — Milestone 39
 
 **Verified on:** 2026-08-13
@@ -2464,7 +2408,7 @@ secure-data-postgres-replica1
 secure-data-postgres-replica2
     PostgreSQL Replica 2
     Host port: 5434
-Verification
+### Verification
 
 Command:
 
@@ -2481,7 +2425,7 @@ The primary reported two active WAL streaming connections:
 
 172.30.0.2 → streaming → async
 172.30.0.4 → streaming → async
-Architecture result
+### Architecture result
 
 The PostgreSQL primary and both replicas are now managed by the project's Docker Compose configuration.
 
@@ -2493,18 +2437,16 @@ with subnet:
 
 172.30.0.0/16
 
-Availability result
+### Availability result
 
 The project now has a reproducible local PostgreSQL topology consisting of one primary and two streaming replicas.
 
-Current limitation
+### Current limitation
 
 The database replication is asynchronous.
 
 The project does not yet implement automatic PostgreSQL promotion/election if the primary database itself fails. Application-level failover has been implemented separately.
-
 ---
-
 ## 49. Code-Verified Secure Audit Logging — Milestone 40
 
 **Verified on:** 2026-08-13
@@ -2524,7 +2466,7 @@ A `login_success` audit event was generated with normal event details and delibe
 ### Verification result
 
 ```text
-audit_event=login_success details={'user_id': 2, 'username': 'testuser'}
+audit_event=login_success details={*'user_id'*: 2, *'username'*: *'testuser'*}
 Audit test completed
 
 The following sensitive values were intentionally supplied but were not included in the log:
@@ -2532,16 +2474,14 @@ The following sensitive values were intentionally supplied but were not included
 Password
 Access key
 Other configured secret fields
-Security result
+### Security result
 
 The audit logger records security-relevant events while filtering configured sensitive fields from log output.
 
-Current limitation
+### Current limitation
 
 The audit logger has been verified independently, but security events have not yet been added to the actual login, access-key, authorization, data-access, and failover paths.
-
 ---
-
 ## 50. Code-Verified Login Audit Logging — Milestone 41
 
 **Verified on:** 2026-08-13
@@ -2556,12 +2496,12 @@ The login flow now records:
 ### Successful-login verification
 
 ```text
-audit_event=login_success details={'user_id': 2, 'username': 'testuser'}
+audit_event=login_success details={*'user_id'*: 2, *'username'*: *'testuser'*}
 Successful login audit test completed
 Failed-login verification
-audit_event=login_failure details={'username': 'testuser'}
+audit_event=login_failure details={*'username'*: *'testuser'*}
 Failed login audit test completed
-Security result
+### Security result
 
 Login events are now auditable without logging:
 
@@ -2571,7 +2511,7 @@ JWTs
 access keys
 encryption keys
 other configured secrets
-Current limitation
+### Current limitation
 
 Audit logging is currently integrated into the login flow only.
 
@@ -2583,9 +2523,7 @@ authorization denial
 customer-data access
 node failover
 data-node errors
-
 ---
-
 ## 51. Code-Verified Protected Data Audit Logging — Milestone 42
 
 **Verified on:** 2026-08-13
@@ -2601,11 +2539,11 @@ The protected-data flow now records:
 ### Verification result
 
 ```text
-audit_event=access_key_issued details={'user_id': 2, 'customer_id': 1, 'field': 'email'}
-audit_event=authorization_denied details={'user_id': 2, 'customer_id': 2, 'reason': 'customer_mismatch'}
-audit_event=customer_data_access details={'user_id': 2, 'customer_id': 1, 'field': 'email'}
+audit_event=access_key_issued details={*'user_id'*: 2, *'customer_id'*: 1, *'field'*: *'email'*}
+audit_event=authorization_denied details={*'user_id'*: 2, *'customer_id'*: 2, *'reason'*: *'customer_mismatch'*}
+audit_event=customer_data_access details={*'user_id'*: 2, *'customer_id'*: 1, *'field'*: *'email'*}
 Protected-flow audit test completed
-Secret filtering
+### Secret filtering
 
 An access-key value was deliberately supplied to the audit function:
 
@@ -2613,16 +2551,14 @@ DO_NOT_LOG
 
 The value was not included in the generated log output.
 
-Security result
+### Security result
 
 Audit logging is now integrated into important protected-data workflows without exposing the access-key token.
 
-Current limitation
+### Current limitation
 
 Node failover events and data-node errors are not yet explicitly logged.
-
 ---
-
 ## 52. Code-Verified Node Failover Audit Logging — Milestone 43
 
 **Verified on:** 2026-08-13
@@ -2637,10 +2573,10 @@ The node-routing layer now records:
 ### Verification result
 
 ```text
-audit_event=data_node_error details={'node': 'customer-node-1', 'customer_id': 1, 'error': 'connection_error'}
-audit_event=data_node_failover_exhausted details={'customer_id': 1, 'attempted_nodes': ['customer-node-1', 'customer-node-2', 'customer-node-3']}
+audit_event=data_node_error details={*'node'*: *'customer-node*-1*'*, *'customer_id'*: 1, *'error'*: *'connection_error'*}
+audit_event=data_node_failover_exhausted details={*'customer_id'*: 1, *'attempted_nodes'*: [*'customer-node*-1*'*, *'customer-node*-2*'*, *'customer-node*-3*'*]}
 Failover audit test completed
-Security result
+### Security result
 
 Node failures and exhausted failover attempts are now observable through the audit logger.
 
@@ -2657,9 +2593,7 @@ Authorization denial
 Customer-data access
 Data-node errors
 Failover exhaustion
-
 ---
-
 ## 53. Code-Verified Automated Test Suite — Milestone 44
 
 **Verified on:** 2026-08-13
@@ -2668,9 +2602,9 @@ Failover exhaustion
 
 ```text
 pytest -v
-Verification result
+### Verification result
 18 passed in 0.38s
-Test coverage
+### Test coverage
 Access-key tests
 Scoped access-key generation
 10-minute expiration
@@ -2696,17 +2630,15 @@ Encrypted value does not contain plaintext
 Failover tests
 Primary failure causes replica usage
 All-node failure produces 503
-Overall result
+### Overall result
 18 / 18 automated tests passed
 
 The current automated suite covers the core security and availability mechanisms implemented by the prototype.
 
-Current limitation
+### Current limitation
 
 The tests are primarily unit-level tests and mocked failover tests.
-
 ---
-
 ## 54. Final Security Verification Checklist — Milestone 45
 
 **Verification scope**
@@ -2776,9 +2708,7 @@ The final manual security verification must still be performed against the runni
 ### Final documentation
 
 After the manual checks pass, update the README with the final architecture, security controls, verification results, and project limitations.
-
 ---
-
 ## 55. Code-Verified Expired Access-Key Rejection — Milestone 46
 
 **Verified on:** 2026-08-13
@@ -2803,7 +2733,7 @@ Response:
 {
     "detail": "Invalid or expired access key"
 }
-Security result
+### Security result
 
 The protected customer-data endpoint rejects expired access keys before data retrieval occurs.
 
@@ -2819,9 +2749,7 @@ Expired access-key rejection
 User scope validation
 Customer scope validation
 Field scope validation
-
 ---
-
 ## 56. Code-Verified Real Primary Node Failure and Replica Recovery — Milestone 47
 
 **Verified on:** 2026-08-13
@@ -2854,7 +2782,7 @@ Response:
     "customer_id": 1,
     "email": "alice@example.com"
 }
-Replica evidence
+### Replica evidence
 
 Customer Node 2 logged:
 
@@ -2862,25 +2790,25 @@ GET /customer/1/email HTTP/1.1" 200 OK
 
 Customer Node 3 did not receive the customer-data request.
 
-Verified failover path
+### Verified failover path
 Customer Node 1
     ↓
 Unavailable
     ↓
-Main API
+### Main API
     ↓
 Customer Node 2
     ↓
 Customer data returned
     ↓
 200 OK
-Availability result
+### Availability result
 
 The running application successfully served an authorized customer-data request after the primary application node was stopped.
 
 This verifies the real application-level primary-to-replica failover path.
 
-Final security result
+### Final security result
 
 The failover request still passed through the existing:
 
