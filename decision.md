@@ -715,3 +715,55 @@ Protected routes will depend on a reusable JWT-validation function.
 **Follow-up**
 
 Implement JWT validation, protect the customer email endpoint, and verify that requests without a valid token are rejected.
+
+---
+
+## 2026-08-13 — Use user-to-customer ownership for initial authorization
+
+**Decision**
+
+For the first authorization implementation, associate each user with the customer record they are allowed to access.
+
+**Why this approach**
+
+The project needs to demonstrate a distinction between authentication and authorization. Authentication proves who the user is; ownership determines whether that authenticated user is allowed to access the requested customer data.
+
+A simple user-to-customer relationship makes this easy to understand, test, and extend later.
+
+**Alternatives considered**
+
+- Allow every authenticated user to access every customer — simpler, but does not demonstrate meaningful authorization.
+- Role-based access control (RBAC) immediately — useful for larger systems, but more complex than necessary for the first authorization prototype.
+- Attribute-based access control (ABAC) — flexible, but unnecessary complexity at this stage.
+
+**Libraries / technologies involved**
+
+- PostgreSQL
+- FastAPI
+- PyJWT
+
+**Why this technology**
+
+The JWT provides the authenticated user ID, while PostgreSQL can store the relationship between the user and the customer they are authorized to access.
+
+**Security impact**
+
+Positive because a valid JWT alone will no longer be sufficient to access arbitrary customer records. The server will explicitly check the authenticated user's permission.
+
+**Trade-offs / risks**
+
+Ownership is intentionally simple and is not a complete enterprise authorization system. Future versions may need roles, groups, permissions, delegated access, or attribute-based policies.
+
+**Files changed**
+
+- `decision.md`
+- `app/users.sql`
+- `app/routes.py`
+
+**Code impact**
+
+The users data model will gain an authorization relationship, and protected routes will check that relationship before returning customer data.
+
+**Follow-up**
+
+Add the user-to-customer relationship, create test authorization data, implement the authorization check, and verify both allowed and denied requests.
