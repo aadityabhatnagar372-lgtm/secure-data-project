@@ -1327,3 +1327,70 @@ The node directory will represent primary and replica nodes, and the request pat
 **Follow-up**
 
 Implement primary/replica metadata, add failover routing, then simulate primary-node failure and verify that an authorized request can still reach an available replica.
+
+---
+
+## 2026-08-13 — Use PostgreSQL primary-to-replica replication
+
+**Decision**
+
+Use PostgreSQL streaming replication for the initial database-replication prototype.
+
+The architecture will contain one PostgreSQL primary and two PostgreSQL replicas.
+
+**Why this approach**
+
+The application-level failover layer is already working, but all three application nodes currently use the same PostgreSQL instance. This does not provide independent data storage.
+
+Separate PostgreSQL instances with replication make the data-node architecture genuinely distributed.
+
+**Target architecture**
+
+```text
+Customer Node 1
+      ↓
+PostgreSQL Primary
+      ↓
+   replication
+   ↙          ↘
+Replica 1    Replica 2
+   ↑            ↑
+Node 2        Node 3
+
+Alternatives considered
+
+Continue using one shared PostgreSQL instance — rejected because it does not provide independent database storage or database-level redundancy.
+Application-level copying of records — rejected because it creates custom replication logic and increases consistency risks.
+PostgreSQL logical replication — possible, but the first prototype will use PostgreSQL streaming replication for the primary/standby relationship.
+Full automatic cluster management — deferred because it adds significant operational complexity beyond the current prototype.
+
+Libraries / technologies involved
+
+PostgreSQL
+Docker Compose
+Existing FastAPI data-node services
+
+Security impact
+
+Replication credentials and PostgreSQL authentication credentials must be protected and must not be committed to Git.
+
+Replica databases must not expose unauthenticated access to clients.
+
+Trade-offs / risks
+
+Streaming replication creates standby copies that are primarily intended for read/failover scenarios. Promotion and automatic leader election are separate concerns and will not be assumed to happen automatically.
+
+Replication lag must also be considered when reading newly written data from replicas.
+
+Files changed
+
+decision.md
+docker-compose.yml
+PostgreSQL configuration files
+app/database.py
+
+Code impact
+
+Each customer data node will eventually connect to its own PostgreSQL instance rather than sharing a single database connection.
+
+The primary database will stream changes to the replica databases.
