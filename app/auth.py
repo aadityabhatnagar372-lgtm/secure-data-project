@@ -4,9 +4,12 @@ from datetime import datetime, timedelta, timezone
 import jwt
 
 
-JWT_SECRET = os.getenv("JWT_SECRET", "development-only-secret")
+JWT_SECRET = os.getenv("JWT_SECRET")
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRE_MINUTES = 30
+
+if not JWT_SECRET:
+    raise RuntimeError("JWT_SECRET environment variable is not set")
 
 
 def create_access_token(user_id: int) -> str:
