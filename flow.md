@@ -1361,4 +1361,63 @@ The customer data node does not yet own or query the PostgreSQL customer data.
 
 The main API still performs the customer database query directly.
 
-Next step
+---
+
+## 29. Code-Verified Customer Data Node Retrieval — Milestone 20
+
+**Verified on:** 2026-08-13
+
+### Endpoint
+
+`GET /customer/{customer_id}/email`
+
+### Service
+
+Customer Data Node
+
+Address:
+
+`http://127.0.0.1:8001`
+
+### Verification
+
+Request:
+
+`GET /customer/1/email`
+
+Result:
+
+```json
+{
+    "customer_id": 1,
+    "email": "alice@example.com"
+}
+Execution flow
+
+Client / Service
+↓
+Customer Data Node
+↓
+get_customer_email(customer_id)
+↓
+PostgreSQL
+↓
+SELECT email FROM customers WHERE id = %s
+↓
+Email returned
+
+Current architecture
+
+Main API
+↓
+Node Directory
+↓
+Customer Data Node :8001
+↓
+PostgreSQL
+
+Current limitation
+
+The main API does not yet call the customer data node.
+
+The main API currently performs the customer-data retrieval itself.
