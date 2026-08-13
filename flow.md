@@ -2014,3 +2014,45 @@ Access-key existence
 Access-key expiration
 User scope
 Customer scope
+
+---
+
+## 40. Code-Verified Access-Key Field Scope — Milestone 31
+
+**Verified on:** 2026-08-13
+
+### Test
+
+A valid access key was issued with:
+
+- Customer: `1`
+- Field: `phone`
+
+The same key was then used to request:
+
+`GET /customer/1/email`
+
+The JWT was valid and the customer matched, but the access-key field scope did not match the requested field.
+
+### Verification result
+
+HTTP status:
+
+`403 Forbidden`
+
+Response:
+
+```json
+{
+    "detail": "Access key is not valid for this field"
+}
+Security result
+
+An access key scoped to one field cannot be reused to access a different field.
+
+Verified access-key controls
+Token existence
+Token expiration
+User scope
+Customer scope
+Field scope
