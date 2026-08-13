@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.auth import get_current_user
+from app.data_minimizer import build_customer_select
 from app.database import get_connection
 
 router = APIRouter()
@@ -33,12 +34,11 @@ def get_customer_email(
             detail="You are not authorized to access this customer",
         )
 
+    query = build_customer_select("email")
+
     with get_connection() as connection:
         with connection.cursor() as cursor:
-            cursor.execute(
-                "SELECT email FROM customers WHERE id = %s",
-                (customer_id,),
-            )
+            cursor.execute(query, (customer_id,))
             customer = cursor.fetchone()
 
     if customer is None:
