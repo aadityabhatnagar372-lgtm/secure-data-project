@@ -816,3 +816,60 @@ No code yet. This decision defines how the system will locate distributed data b
 **Follow-up**
 
 Create a small node-directory structure and verify that a customer identifier can be mapped to a data node.
+
+---
+
+## 2026-08-13 — Use an allowlisted field-selection layer for data minimization
+
+**Decision**
+
+Use an allowlist of permitted fields and a dedicated data-minimization layer to control which customer fields can be returned.
+
+**Why this approach**
+
+The core goal of the project is to return only the data explicitly requested by the user. An allowlist prevents arbitrary column selection and provides one controlled place to define which fields are available.
+
+For example:
+
+`email` → allowed
+
+`phone` → allowed if explicitly requested
+
+`password_hash` → never exposed
+
+**Alternatives considered**
+
+- Let the client provide any SQL column name — rejected because it could expose fields that should never be returned.
+- Retrieve the full customer record and filter it afterward — rejected because unnecessary data would already have been retrieved.
+- Hardcode separate SQL queries inside every endpoint — works for a tiny prototype, but makes the data-minimization rules harder to maintain consistently.
+
+**Libraries / technologies involved**
+
+- Python
+- Psycopg 3
+- PostgreSQL
+
+**Why this technology**
+
+Python can maintain the field allowlist, while Psycopg 3 and PostgreSQL allow the application to retrieve only the selected column.
+
+**Security impact**
+
+Positive. The allowlist prevents arbitrary field access and reduces unnecessary data retrieval and exposure.
+
+**Trade-offs / risks**
+
+The allowlist must be maintained whenever the database schema changes. Authorization must still be performed separately; allowing a field does not mean every user is authorized to access it.
+
+**Files changed**
+
+- `decision.md`
+- Future data-minimization module
+
+**Code impact**
+
+A reusable data-minimization layer will control which fields can be queried and returned.
+
+**Follow-up**
+
+Implement the field allowlist and connect the customer email endpoint to it.
