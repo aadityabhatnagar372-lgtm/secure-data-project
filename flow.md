@@ -1482,3 +1482,54 @@ Current limitation
 Only one data node exists.
 
 Node 2 and Node 3, service-to-service authentication, encryption in transit, and failover have not yet been implemented.
+
+---
+
+## 31. Code-Verified Customer Data Node 2 — Milestone 22
+
+**Verified on:** 2026-08-13
+
+### Service
+
+`app/customer_node_2/main.py`
+
+### Runtime
+
+Command:
+
+`python -m uvicorn app.customer_node_2.main:app --port 8002`
+
+### Service address
+
+`http://127.0.0.1:8002`
+
+### Endpoint
+
+`GET /health`
+
+### Verification result
+
+```json
+{
+    "node": "customer-node-2",
+    "status": "healthy"
+}
+Current distributed-node architecture
+
+Customer Node 1
+↓
+127.0.0.1:8001
+
+Customer Node 2
+↓
+127.0.0.1:8002
+
+Architecture result
+
+Two independent customer data-node services can run simultaneously on separate ports.
+
+Current limitation
+
+Node 2 currently provides only a health endpoint.
+
+It is not yet connected to customer data or used by the node directory for request routing.
