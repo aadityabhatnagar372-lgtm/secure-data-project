@@ -2657,3 +2657,50 @@ Authorization denial
 Customer-data access
 Data-node errors
 Failover exhaustion
+
+---
+
+## 53. Code-Verified Automated Test Suite — Milestone 44
+
+**Verified on:** 2026-08-13
+
+### Test command
+
+```text
+pytest -v
+Verification result
+18 passed in 0.38s
+Test coverage
+Access-key tests
+Scoped access-key generation
+10-minute expiration
+Access-key storage and retrieval
+Expired access-key rejection
+Audit tests
+Safe audit details are logged
+Sensitive values are filtered
+Authentication tests
+JWT contains the user ID
+JWT expiration is present
+Valid bearer credentials return the user ID
+Invalid JWTs are rejected
+Data-minimization tests
+Allowed customer fields
+Valid email field
+Unauthorized field rejection
+Correct email SELECT query
+Unauthorized field rejection in query builder
+Encryption tests
+Fernet encrypt/decrypt round trip
+Encrypted value does not contain plaintext
+Failover tests
+Primary failure causes replica usage
+All-node failure produces 503
+Overall result
+18 / 18 automated tests passed
+
+The current automated suite covers the core security and availability mechanisms implemented by the prototype.
+
+Current limitation
+
+The tests are primarily unit-level tests and mocked failover tests.
