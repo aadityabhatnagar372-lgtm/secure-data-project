@@ -2056,3 +2056,34 @@ Token expiration
 User scope
 Customer scope
 Field scope
+
+---
+
+## 41. Code-Verified Access-Key Expiration — Milestone 32
+
+**Verified on:** 2026-08-13
+
+### Test
+
+An access-key record with an expiration timestamp one second in the past was inserted into the access-key store.
+
+### Verification result
+
+```text
+Expired key result: None
+
+The expired key was rejected by get_access_key().
+
+Security result
+
+Expired access keys cannot be retrieved from the access-key store and therefore cannot be used for protected data access.
+
+Verified access-key controls
+Token existence
+10-minute expiration
+User scope
+Customer scope
+Field scope
+Current limitation
+
+Expiration has been verified at the access-key store level.
