@@ -1246,3 +1246,66 @@ Current limitation
 The customer API does not yet use the node directory to locate its database.
 
 The current implementation still connects directly using the existing database configuration.
+
+---
+
+## 27. Code-Verified Data Minimization Layer — Milestone 18
+
+**Verified on:** 2026-08-13
+
+### Module
+
+`app/data_minimizer.py`
+
+### Functions
+
+`validate_customer_field(field)`
+
+`build_customer_select(field)`
+
+### Allowed-field test
+
+Input:
+
+`email`
+
+Result:
+
+```sql
+SELECT email FROM customers WHERE id = %s
+
+The requested field was accepted and included as the only selected column.
+
+Rejected-field test
+
+Input:
+
+password_hash
+
+Result:
+
+ValueError: Field 'password_hash' is not available for access.
+
+The sensitive field was rejected because it is not present in the allowlist.
+
+Current verified flow
+
+Requested field
+↓
+validate_customer_field()
+↓
+Allowlisted?
+├── No → reject request
+└── Yes
+↓
+build_customer_select()
+↓
+Generate query for only the requested field
+
+Security result
+
+The data-minimization layer prevents arbitrary field selection and prevents password_hash from being requested through this component.
+
+Current limitation
+
+The customer API endpoint still contains its own SQL query and does not yet use build_customer_select().
