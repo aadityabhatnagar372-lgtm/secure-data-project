@@ -935,3 +935,62 @@ The customer data service will become the owner of customer-data access, while t
 **Follow-up**
 
 Create the customer data-node service and run it as a separate Docker container.
+
+---
+
+## 2026-08-13 — Use HTTP between the API and data nodes
+
+**Decision**
+
+Use HTTP API calls for communication between the main API and individual data-node services.
+
+**Why this approach**
+
+The project already uses FastAPI for its services. HTTP provides a simple service boundary and allows the main API to communicate with data nodes independently of their internal implementation.
+
+This also makes the architecture easier to expand later:
+
+Main API
+    ↓
+Node Directory
+    ↓
+HTTP
+    ↓
+Node 1 / Node 2 / Node 3
+
+**Alternatives considered**
+
+- Direct PostgreSQL connections from the main API — simpler initially, but tightly couples the main API to every database node.
+- Message queues — useful for asynchronous workflows, but unnecessary for the synchronous data-request path at this stage.
+- gRPC — efficient and strongly typed, but adds complexity that is not needed for the first prototype.
+
+**Libraries / technologies involved**
+
+- FastAPI
+- HTTP
+- Python HTTP client to be selected during implementation
+
+**Why this technology**
+
+HTTP works naturally with FastAPI and is easy to test using Postman, browsers, and standard HTTP clients.
+
+**Security impact**
+
+The data-node service should not be exposed directly to users. Only trusted service-to-service requests should reach the node in the intended architecture.
+
+**Trade-offs / risks**
+
+HTTP introduces network latency and requires service authentication and error handling. The first prototype will run locally, but production deployment would require encrypted transport and stronger service-to-service authentication.
+
+**Files changed**
+
+- `decision.md`
+- Future main API / customer-node files
+
+**Code impact**
+
+The main API will stop querying the customer database directly and instead request customer data from the appropriate data node.
+
+**Follow-up**
+
+Add a customer-data endpoint to the customer node and make the main API call it through the node-directory mapping.
