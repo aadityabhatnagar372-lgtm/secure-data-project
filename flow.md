@@ -922,3 +922,61 @@ The endpoint currently does **not**:
 ### Next implementation
 
 Connect the login function to PostgreSQL and verify the submitted password using the existing Argon2 password-verification function.
+
+---
+
+## 21. Code-Verified Database-Backed JWT Login — Milestone 12
+
+**Verified on:** 2026-08-13
+
+### Endpoint
+
+`POST /login`
+
+### Execution flow
+
+Client
+    ↓
+POST `/login`
+    ↓
+`LoginRequest` validation
+    ↓
+Query PostgreSQL `users`
+    ↓
+Find username
+    ↓
+Retrieve `password_hash`
+    ↓
+Argon2 password verification
+    ↓
+Create JWT with `create_access_token()`
+    ↓
+Return bearer access token
+
+### Verified request
+
+```json
+{
+    "username": "testuser",
+    "password": "TestPassword123!"
+}
+
+Verification result
+
+HTTP status: 200
+
+Response contains:
+
+{
+    "access_token": "<signed JWT>",
+    "token_type": "bearer"
+}
+Security result
+Password was verified against the stored Argon2 hash.
+The plaintext password was not returned.
+A signed JWT was generated only after successful authentication.
+Current limitation
+
+The JWT is currently issued but is not yet required to access the customer data endpoint.
+
+The next step is JWT validation and protecting /customer/{customer_id}/email.
