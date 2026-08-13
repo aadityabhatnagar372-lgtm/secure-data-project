@@ -375,3 +375,52 @@ The database module will read its connection settings from environment variables
 **Follow-up**
 
 Implement the connection function and verify that the FastAPI application can connect to PostgreSQL.
+
+---
+
+## 2026-08-13 — Initial customer data schema
+
+**Decision**
+
+Use a simple `customers` table with the fields `id`, `name`, `email`, `phone`, and `address` for the first data-minization demonstration.
+
+**Why this approach**
+
+The project needs a realistic record containing multiple pieces of information so we can demonstrate the difference between retrieving an entire record and retrieving only the specific field requested by the user.
+
+For example, a customer record can contain five fields, while a request such as `customer/101/email` should return only the email.
+
+**Alternatives considered**
+
+- Use only one field — too simple to demonstrate data minimization.
+- Use a much larger enterprise schema — unnecessary complexity for the first prototype.
+- Store the test data in JSON files — less representative of the PostgreSQL data-node architecture.
+
+**Libraries / technologies involved**
+
+- PostgreSQL
+
+**Why this technology**
+
+PostgreSQL allows the application to explicitly select individual columns, which directly supports the project's data-minimization goal.
+
+**Security impact**
+
+The schema intentionally contains multiple fields so that later authorization and query controls can demonstrate that unauthorized or unnecessary fields are not returned.
+
+**Trade-offs / risks**
+
+This is demonstration data, not a production customer schema. Real deployments would require stronger privacy controls, constraints, indexing, access policies, and appropriate handling of sensitive information.
+
+**Files changed**
+
+- `decision.md`
+- `app/schema.sql`
+
+**Code impact**
+
+The schema will define the first customer data structure used by the PostgreSQL data node.
+
+**Follow-up**
+
+Create the table and insert safe sample data for testing the first field-specific request.
