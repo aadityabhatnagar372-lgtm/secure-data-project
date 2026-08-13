@@ -1706,3 +1706,69 @@ It is not yet stored, validated, used to access data, or rejected after expirati
 ### Next step
 
 Implement access-key storage and validation so expired or incorrectly scoped keys cannot be used.
+
+---
+
+## 35. Code-Verified Access Key Storage and Expiry — Milestone 26
+
+**Verified on:** 2026-08-13
+
+### Module
+
+`app/access_key_store.py`
+
+### Functions
+
+`store_access_key(access_key)`
+
+`get_access_key(token)`
+
+### Valid-key verification
+
+A generated access key was stored and then retrieved successfully.
+
+Verified:
+
+- User ID: `2`
+- Customer ID: `1`
+- Field: `email`
+
+### Expired-key verification
+
+A key with an expiration timestamp one second in the past was stored.
+
+Validation result:
+
+```text
+Before validation: None
+After validation: None
+
+The expired key was rejected and removed from the in-memory store.
+
+Current verified flow
+
+Generate access key
+↓
+Store access key
+↓
+Client presents token
+↓
+get_access_key(token)
+↓
+Check expiration
+├── Valid → return scoped access record
+└── Expired → remove and reject
+
+Security result
+
+The access-key store now enforces server-side expiration.
+
+A key cannot be retrieved from the store after its expiration time.
+
+Current limitation
+
+The access key is not yet connected to the customer-data request flow.
+
+The application does not yet require this 10-minute key before returning protected data.
+
+The store is also in-memory, so it is not shared between multiple API processes or nodes.
