@@ -1971,3 +1971,46 @@ Wrong field
 Expired key
 
 These tests should be completed before marking the access-key integration fully tested.
+
+---
+
+## 39. Code-Verified Access-Key Customer Scope — Milestone 30
+
+**Verified on:** 2026-08-13
+
+### Test
+
+An access key issued for:
+
+- Customer: `1`
+- Field: `email`
+
+was used to request:
+
+`GET /customer/2/email`
+
+The JWT was valid.
+
+### Verification result
+
+HTTP status:
+
+`403 Forbidden`
+
+Response:
+
+```json
+{
+    "detail": "Access key is not valid for this customer"
+}
+Security result
+
+An access key cannot be reused to access a different customer from the customer for which it was issued.
+
+Current verified access-key controls
+Authentication through JWT
+Customer authorization
+Access-key existence
+Access-key expiration
+User scope
+Customer scope
