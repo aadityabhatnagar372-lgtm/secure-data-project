@@ -1209,3 +1209,74 @@ No application code yet. This decision defines the short-lived access-key mechan
 **Follow-up**
 
 Implement the short-lived access-key service, generate a 10-minute token for an authorized request, and verify that expired keys are rejected.
+
+---
+
+## 2026-08-13 — Use the short-lived access key as a scoped data-access credential
+
+**Decision**
+
+Require the 10-minute access key for the final customer-data retrieval step after JWT authentication and authorization have succeeded.
+
+**Why this approach**
+
+The JWT identifies the authenticated user, while the short-lived access key limits access to a specific customer and field for a limited period.
+
+This separates long-lived identity/authentication from temporary, narrowly scoped data access.
+
+**Flow**
+
+JWT
+    ↓
+Authentication
+    ↓
+Authorization
+    ↓
+Issue scoped 10-minute access key
+    ↓
+Client presents access key
+    ↓
+Validate key
+    ↓
+Retrieve requested data
+
+**Alternatives considered**
+
+- Use only the JWT for data access — simpler, but does not provide the separate temporary credential required by the project design.
+- Generate a new JWT for every data request — mixes authentication and temporary resource access concerns.
+- Use an unscoped temporary key — weaker because the key could potentially be reused for unrelated data.
+
+**Libraries / technologies involved**
+
+- Existing JWT authentication
+- Existing access-key generator
+- Existing access-key store
+- FastAPI
+
+**Security impact**
+
+Positive because the temporary credential is limited by:
+
+- user identity
+- customer ID
+- requested field
+- expiration time
+
+The server validates all of these before allowing access.
+
+**Trade-offs / risks**
+
+The client must obtain and present the temporary access key correctly. The access-key store must remain available while the key is valid.
+
+**Files changed**
+
+- `decision.md`
+- Future access-key and route files
+
+**Code impact**
+
+The customer-data workflow will gain a separate temporary authorization step before data retrieval.
+
+**Follow-up**
+
+Implement issuance and validation of the access key in the customer-data workflow and verify that an expired or incorrectly scoped key is rejected.
