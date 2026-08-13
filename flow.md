@@ -1309,3 +1309,56 @@ The data-minimization layer prevents arbitrary field selection and prevents pass
 Current limitation
 
 The customer API endpoint still contains its own SQL query and does not yet use build_customer_select().
+
+---
+
+## 28. Code-Verified Customer Data Node — Milestone 19
+
+**Verified on:** 2026-08-13
+
+### Service
+
+`app/customer_node/main.py`
+
+### Runtime
+
+Command:
+
+`python -m uvicorn app.customer_node.main:app --port 8001`
+
+### Service address
+
+`http://127.0.0.1:8001`
+
+### Endpoint
+
+`GET /health`
+
+### Verification result
+
+```json
+{
+    "node": "customer-node-1",
+    "status": "healthy"
+}
+Current verified architecture
+
+Main API
+↓
+Customer Data Node
+↓
+127.0.0.1:8001
+
+Security / architecture result
+
+The customer data node now runs as a separate application process from the main API.
+
+This establishes the first explicit service boundary in the distributed architecture.
+
+Current limitation
+
+The customer data node does not yet own or query the PostgreSQL customer data.
+
+The main API still performs the customer database query directly.
+
+Next step
