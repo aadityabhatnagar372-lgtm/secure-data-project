@@ -1829,3 +1829,61 @@ The key is scoped to the requested customer and field and has a 10-minute expira
 Current limitation
 
 The customer-data endpoint does not yet require the issued access key.
+
+---
+
+## 37. Code-Verified Access-Key Enforcement — Milestone 28
+
+**Verified on:** 2026-08-13
+
+### Endpoint
+
+`GET /customer/{customer_id}/email`
+
+### Test
+
+A valid JWT was supplied, but no `X-Access-Key` header was provided.
+
+### Verification result
+
+HTTP status:
+
+`401 Unauthorized`
+
+Response:
+
+```json
+{
+    "detail": "Access key is required"
+}
+Security result
+
+A valid JWT alone is no longer sufficient to retrieve customer data.
+
+The protected data endpoint now requires both:
+
+JWT authentication
+A valid scoped access key
+Current flow
+
+JWT
+↓
+Authenticate user
+↓
+Require X-Access-Key
+↓
+Validate access key
+↓
+Validate scope
+↓
+Retrieve customer data
+
+Current limitation
+
+We have verified that the access key is required, but we still need to verify:
+
+valid access key → allowed
+wrong customer → rejected
+wrong user → rejected
+wrong field → rejected
+expired access key → rejected
