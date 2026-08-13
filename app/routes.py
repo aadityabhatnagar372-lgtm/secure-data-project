@@ -44,6 +44,12 @@ def request_customer_email_from_node(customer_id: int) -> dict:
     nodes.extend(replicas)
 
     if not nodes:
+        audit_event(
+            "data_node_failover_exhausted",
+            customer_id=customer_id,
+            attempted_nodes=[],
+        )
+
         raise HTTPException(
             status_code=503,
             detail="No customer data nodes are configured",
@@ -69,8 +75,30 @@ def request_customer_email_from_node(customer_id: int) -> dict:
                     detail="Customer not found",
                 )
 
-        except URLError:
+            audit_event(
+                "data_node_error",
+                node=node.name,
+                customer_id=customer_id,
+                error=f"http_{exc.code}",
+            )
+
             continue
+
+        except URLError:
+            audit_event(
+                "data_node_error",
+                node=node.name,
+                customer_id=customer_id,
+                error="connection_error",
+            )
+
+            continue
+
+    audit_event(
+        "data_node_failover_exhausted",
+        customer_id=customer_id,
+        attempted_nodes=[node.name for node in nodes],
+    )
 
     raise HTTPException(
         status_code=503,
@@ -105,6 +133,7 @@ def get_customer_email(
             customer_id=customer_id,
             reason="access_key_user_mismatch",
         )
+
         raise HTTPException(
             status_code=403,
             detail="Access key does not belong to the authenticated user",
@@ -117,6 +146,7 @@ def get_customer_email(
             customer_id=customer_id,
             reason="access_key_customer_mismatch",
         )
+
         raise HTTPException(
             status_code=403,
             detail="Access key is not valid for this customer",
@@ -129,6 +159,7 @@ def get_customer_email(
             customer_id=customer_id,
             reason="access_key_field_mismatch",
         )
+
         raise HTTPException(
             status_code=403,
             detail="Access key is not valid for this field",
@@ -160,6 +191,7 @@ def issue_access_key(
             customer_id=request.customer_id,
             reason="customer_ownership_check_failed",
         )
+
         raise HTTPException(
             status_code=403,
             detail="You are not authorized to access this customer",
