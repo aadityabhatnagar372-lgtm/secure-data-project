@@ -1025,3 +1025,63 @@ Unauthenticated clients cannot reach the customer-data query.
 Current limitation
 
 A valid JWT is now required, but the system does not yet check whether the authenticated user is authorized to access the requested customer data.
+
+---
+
+## 23. Code-Verified Authenticated Customer Data Request — Milestone 14
+
+**Verified on:** 2026-08-13
+
+### Endpoint
+
+`GET /customer/{customer_id}/email`
+
+### Verification
+
+A valid JWT obtained from `POST /login` was supplied as:
+
+`Authorization: Bearer <JWT>`
+
+### Execution flow
+
+Client
+    ↓
+Valid bearer JWT
+    ↓
+`get_current_user()`
+    ↓
+JWT signature and expiration validation
+    ↓
+Authenticated user ID obtained
+    ↓
+`get_customer_email(customer_id)`
+    ↓
+PostgreSQL query
+    ↓
+`SELECT email FROM customers WHERE id = %s`
+    ↓
+Only email returned
+
+### Verified request
+
+`GET /customer/1/email`
+
+### Verification result
+
+HTTP status: `200`
+
+Response:
+
+```json
+{
+    "customer_id": 1,
+    "email": "alice@example.com"
+}
+
+Security result
+Requests without a JWT are rejected.
+Requests with a valid JWT can reach the protected endpoint.
+The response still contains only the requested email field.
+Current limitation
+
+Authentication is implemented, but authorization is not.
