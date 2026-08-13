@@ -423,3 +423,61 @@ Expected behavior:
 ### Important limitation
 
 This flow is **planned only**. PostgreSQL has not yet been connected to the application, so no database call is currently verified.
+
+---
+
+## 11. Code-Verified PostgreSQL Node — Milestone 2
+
+**Verified on:** 2026-08-13
+
+### Docker service
+
+Service: `postgres`
+
+Container: `secure-data-postgres`
+
+Image: `postgres:17`
+
+Port: `5432`
+
+### Verification
+
+Command:
+
+`docker compose up -d`
+
+Result:
+
+PostgreSQL container started successfully.
+
+Command:
+
+`docker ps`
+
+Result:
+
+`secure-data-postgres` is running and exposing port `5432`.
+
+Command:
+
+`docker exec secure-data-postgres pg_isready -U secure_user -d secure_data`
+
+Result:
+
+`/var/run/postgresql:5432 - accepting connections`
+
+### Current verified flow
+
+Docker Compose
+    ↓
+PostgreSQL container
+    ↓
+Database `secure_data`
+    ↓
+PostgreSQL accepts connections
+
+### Current limitation
+
+The FastAPI application is **not connected to PostgreSQL yet**.
+
+No application-level database query has been implemented or verified.
