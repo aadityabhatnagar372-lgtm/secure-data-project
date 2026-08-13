@@ -980,3 +980,48 @@ Current limitation
 The JWT is currently issued but is not yet required to access the customer data endpoint.
 
 The next step is JWT validation and protecting /customer/{customer_id}/email.
+
+---
+
+## 22. Code-Verified Protected Customer Endpoint — Milestone 13
+
+**Verified on:** 2026-08-13
+
+### Endpoint
+
+`GET /customer/{customer_id}/email`
+
+### Test
+
+A request was made without an `Authorization: Bearer <JWT>` header.
+
+### Execution flow
+
+Client
+    ↓
+GET `/customer/1/email`
+    ↓
+`get_current_user()`
+    ↓
+No bearer token
+    ↓
+FastAPI security dependency rejects request
+    ↓
+HTTP 401 response
+
+### Verification result
+
+Response:
+
+```json
+{
+    "detail": "Not authenticated"
+}
+
+Security result
+
+Unauthenticated clients cannot reach the customer-data query.
+
+Current limitation
+
+A valid JWT is now required, but the system does not yet check whether the authenticated user is authorized to access the requested customer data.
