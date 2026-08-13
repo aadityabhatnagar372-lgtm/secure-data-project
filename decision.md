@@ -668,3 +668,50 @@ No application code yet. This decision selects the password-hashing mechanism fo
 **Follow-up**
 
 Install the Argon2 library, create the users table, add a development user with a hashed password, and implement password verification.
+
+---
+
+## 2026-08-13 — Validate JWTs with a FastAPI dependency
+
+**Decision**
+
+Use a FastAPI dependency to extract and validate the bearer JWT before allowing access to protected endpoints.
+
+**Why this approach**
+
+The project will eventually have multiple protected endpoints. A reusable dependency gives us one consistent place to validate the JWT instead of duplicating authentication checks inside every route.
+
+**Alternatives considered**
+
+- Validate the JWT separately inside every route — duplicates security logic and makes inconsistent checks more likely.
+- Middleware for all requests — broader than necessary because public endpoints such as `/health` do not need authentication.
+- Server-side session lookup — possible, but the current architecture is already using JWT-based authentication.
+
+**Libraries / technologies involved**
+
+- FastAPI security dependencies
+- PyJWT
+
+**Security impact**
+
+Positive because protected endpoints will reject requests that do not contain a valid bearer token.
+
+JWT signature, expiration, and required claims must be validated before the protected route continues.
+
+**Trade-offs / risks**
+
+JWT validation only establishes that the token is valid and identifies the user. It does not determine whether that user is allowed to access a particular customer or field. Authorization will be implemented separately.
+
+**Files changed**
+
+- `decision.md`
+- `app/auth.py`
+- `app/routes.py`
+
+**Code impact**
+
+Protected routes will depend on a reusable JWT-validation function.
+
+**Follow-up**
+
+Implement JWT validation, protect the customer email endpoint, and verify that requests without a valid token are rejected.
