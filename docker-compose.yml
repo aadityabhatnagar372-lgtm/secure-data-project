@@ -24,9 +24,21 @@ services:
     networks:
       - secure_data_network
 
+  postgres-replica2:
+    image: postgres:17
+    container_name: secure-data-postgres-replica2
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_replica2_data:/var/lib/postgresql/data
+      - ./docker/postgres/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf
+    networks:
+      - secure_data_network
+
 volumes:
   postgres_data:
   postgres_replica1_data:
+  postgres_replica2_data:
 
 networks:
   secure_data_network:
