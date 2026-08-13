@@ -773,3 +773,53 @@ Username + password hash can be stored
 No user record has been created yet.
 
 Password hashing and login verification have not yet been connected to this table.
+
+---
+
+## 18. Code-Verified Argon2 Password Hashing — Milestone 9
+
+**Verified on:** 2026-08-13
+
+### Functions
+
+`app.password.hash_password(password)`
+
+`app.password.verify_password(password, password_hash)`
+
+### Execution flow
+
+Plaintext password
+    ↓
+`hash_password()`
+    ↓
+Argon2 PasswordHasher
+    ↓
+Password hash
+
+For verification:
+
+Submitted password
+    ↓
+`verify_password()`
+    ↓
+Compare against stored Argon2 hash
+    ↓
+True / False
+
+### Verification command
+
+`python -c "from app.password import hash_password, verify_password; h = hash_password('TestPassword123!'); print('Hash generated:', h != 'TestPassword123!'); print('Correct password:', verify_password('TestPassword123!', h)); print('Wrong password:', verify_password('WrongPassword!', h))"`
+
+### Verification result
+
+- Hash generated: `True`
+- Correct password: `True`
+- Wrong password: `False`
+
+### Security result
+
+Passwords are hashed before storage and are not stored as plaintext.
+
+### Current limitation
+
+Password hashing is verified, but it has not yet been connected to the `users` table or login endpoint.
