@@ -572,3 +572,52 @@ No application code yet. This decision defines the authentication mechanism for 
 **Follow-up**
 
 Select the Python JWT library, implement login, issue a short-lived authentication token, and protect the customer email endpoint.
+
+---
+
+## 2026-08-13 — Use database-backed username/password login
+
+**Decision**
+
+Use a simple username and password login backed by PostgreSQL for the initial authentication prototype.
+
+**Why this approach**
+
+The project needs a clear authentication step before users can access protected data. A database-backed login gives us a simple way to associate an authenticated identity with the permissions that will later be checked by the authorization layer.
+
+**Alternatives considered**
+
+- Hardcoded demo credentials — simple, but not representative of a real application and unsuitable for the authorization architecture we are building.
+- OAuth 2.0 / OpenID Connect — stronger for production identity management, but unnecessarily complex for the first local prototype.
+- API keys as the primary login mechanism — better suited to service-to-service authentication than interactive user login.
+
+**Libraries / technologies involved**
+
+- PostgreSQL
+- FastAPI
+- Password-hashing library to be selected during implementation
+- PyJWT
+
+**Why these technologies**
+
+PostgreSQL stores the user record and password hash. FastAPI handles the login request. A dedicated password-hashing library will protect passwords rather than storing them directly. PyJWT creates the authentication token after successful login.
+
+**Security impact**
+
+Passwords must never be stored in plaintext. The login process must verify a password against its stored hash, issue a signed JWT only after successful verification, and avoid exposing password information in API responses or logs.
+
+**Trade-offs / risks**
+
+This is a prototype authentication system. A production deployment would need stronger identity management, account lockout/rate limiting, MFA, password-reset mechanisms, secure secret management, and additional monitoring.
+
+**Files changed**
+
+- `decision.md`
+
+**Code impact**
+
+No application code yet. This decision defines the login architecture for the next implementation step.
+
+**Follow-up**
+
+Select a password-hashing library, create the users table, add a test user, and implement the login endpoint.
