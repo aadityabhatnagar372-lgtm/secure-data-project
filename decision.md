@@ -470,3 +470,58 @@ Added three fictional customer records for controlled testing.
 **Follow-up**
 
 Use these records to verify that the application can retrieve one requested field without returning the complete customer record.
+
+---
+
+## 2026-08-13 — Use a field-specific customer data endpoint
+
+**Decision**
+
+Create an endpoint in the form:
+
+`GET /customer/{customer_id}/email`
+
+that returns only the customer's email address.
+
+**Why this approach**
+
+This endpoint directly demonstrates the project's main data-minimization goal. The client explicitly asks for one field, so the server should retrieve and return only that field rather than retrieving the complete customer record.
+
+**Alternatives considered**
+
+- `GET /customer/{customer_id}` returning the full customer record — simpler, but exposes unnecessary information.
+- `GET /customer/{customer_id}?field=email` — possible, but the field-specific route makes the intended resource and allowed operation explicit for the first prototype.
+- Return the full record and filter it on the client — insecure for this project because unnecessary data would already have been exposed.
+
+**Libraries / technologies involved**
+
+- FastAPI
+- Psycopg 3
+- PostgreSQL
+
+**Why these technologies**
+
+FastAPI handles the HTTP request, Psycopg 3 provides direct PostgreSQL access, and PostgreSQL allows the application to select only the requested `email` column.
+
+**Security impact**
+
+Positive because the endpoint is designed to expose only one requested field. This is an initial data-minimization control, although authentication and authorization have not yet been implemented.
+
+**Trade-offs / risks**
+
+This first endpoint is intentionally narrow. More fields and operations will require a consistent authorization and validation strategy to prevent unauthorized field access.
+
+**Files changed**
+
+- `decision.md`
+- `app/routes.py`
+- `app/main.py`
+- `app/database.py`
+
+**Code impact**
+
+The application will gain its first database-backed API endpoint.
+
+**Follow-up**
+
+Implement the endpoint, query only the `email` column, and verify that the response contains no other customer fields.
