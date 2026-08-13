@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
 from app.auth import get_current_user
 from app.database import get_connection
@@ -6,11 +6,33 @@ from app.database import get_connection
 router = APIRouter()
 
 
+def check_customer_access(user_id: int, customer_id: int) -> bool:
+    """Check whether the authenticated user owns the requested customer."""
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT customer_id FROM users WHERE id = %s",
+                (user_id,),
+            )
+            user = cursor.fetchone()
+
+    if user is None:
+        return False
+
+    return user[0] == customer_id
+
+
 @router.get("/customer/{customer_id}/email")
 def get_customer_email(
     customer_id: int,
     current_user_id: int = Depends(get_current_user),
 ):
+    if not check_customer_access(current_user_id, customer_id):
+        raise HTTPException(
+            status_code=403,
+            detail="You are not authorized to access this customer",
+        )
+
     with get_connection() as connection:
         with connection.cursor() as cursor:
             cursor.execute(
@@ -20,9 +42,10 @@ def get_customer_email(
             customer = cursor.fetchone()
 
     if customer is None:
-        return {
-            "error": "Customer not found",
-        }
+        raise HTTPException(
+            status_code=404,
+            detail="Customer not found",
+        )
 
     return {
         "customer_id": customer_id,
