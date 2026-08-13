@@ -2367,3 +2367,79 @@ application-level replica failover
 Current limitation
 
 The replication topology is currently created manually with Docker commands.
+
+---
+
+## 47. Code-Verified Dual PostgreSQL Replica Topology — Milestone 38
+
+**Verified on:** 2026-08-13
+
+### Primary database
+
+`secure-data-postgres`
+
+Network address:
+
+`172.30.0.3`
+
+### Replica 1
+
+`secure-data-postgres-replica1`
+
+Network address:
+
+`172.30.0.2`
+
+### Replica 2
+
+`secure-data-postgres-replica2`
+
+Network address:
+
+`172.30.0.4`
+
+### Replication status
+
+The primary reported two active replication connections:
+
+```text
+client_addr | state      | sync_state
+------------+------------+-----------
+172.30.0.2 | streaming  | async
+172.30.0.4 | streaming  | async
+Data replication verification
+
+The test record:
+
+id = 4
+name = Replication Test
+email = replication@example.com
+
+was successfully retrieved from Replica 1 and Replica 2.
+
+Verified architecture
+                PostgreSQL Primary
+                172.30.0.3
+                      │
+             ┌────────┴────────┐
+             │                 │
+          streaming         streaming
+             │                 │
+             ▼                 ▼
+        Replica 1          Replica 2
+        172.30.0.2         172.30.0.4
+             │                 │
+             └──── replicated data ────┘
+Availability result
+
+The system now has:
+
+one PostgreSQL primary
+two PostgreSQL streaming replicas
+verified data replication to both replicas
+application-level failover routing
+Current limitation
+
+The Docker Compose file currently defines the primary and Replica 1, but Replica 2 still needs to be added declaratively to Compose.
+
+The existing manually created Replica 2 should remain running until its Compose definition is added and verified.
