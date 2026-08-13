@@ -525,3 +525,50 @@ The application will gain its first database-backed API endpoint.
 **Follow-up**
 
 Implement the endpoint, query only the `email` column, and verify that the response contains no other customer fields.
+
+---
+
+## 2026-08-13 — Use JWT for initial authentication
+
+**Decision**
+
+Use JSON Web Tokens (JWT) for the first authentication implementation.
+
+**Why this approach**
+
+The project exposes HTTP APIs, so the client needs a way to prove that it has successfully authenticated when making later requests. JWT provides a compact token that can be sent with API requests without requiring the API to keep the user's login session in server memory.
+
+**Alternatives considered**
+
+- Server-side sessions — simple and secure when implemented correctly, but require server-side session storage and session management.
+- API keys — simple for service-to-service access, but less suitable for the initial user login flow.
+- OAuth 2.0 / OpenID Connect — powerful and appropriate for larger production systems, but more complex than needed for the first local prototype.
+
+**Libraries / technologies involved**
+
+- JWT
+- Python authentication library to be selected during implementation
+
+**Why this technology**
+
+JWT fits the API-based architecture and gives us a clear separation between authentication and the later authorization layer.
+
+**Security impact**
+
+Authentication will prevent anonymous users from accessing protected endpoints once implemented. JWT signing keys must be protected, token lifetime must be limited appropriately, and tokens must be validated on every protected request.
+
+**Trade-offs / risks**
+
+JWT does not automatically provide authorization. A valid token only proves that the token was issued for an authenticated identity. The application must separately check whether that identity is allowed to access the requested data.
+
+**Files changed**
+
+- `decision.md`
+
+**Code impact**
+
+No application code yet. This decision defines the authentication mechanism for the next implementation stage.
+
+**Follow-up**
+
+Select the Python JWT library, implement login, issue a short-lived authentication token, and protect the customer email endpoint.
