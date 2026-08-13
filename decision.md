@@ -1094,3 +1094,53 @@ No application code yet. This decision defines the cryptographic approach for th
 **Follow-up**
 
 Select the cryptographic library and authenticated-encryption method, then implement a small encryption/decryption service and verify round-trip behavior.
+
+---
+
+## 2026-08-13 — Use cryptography Fernet for initial application encryption
+
+**Decision**
+
+Use the Python `cryptography` library with Fernet symmetric authenticated encryption for the first application-level encryption implementation.
+
+**Why this approach**
+
+The project needs an established encryption mechanism that provides confidentiality and integrity without requiring us to implement encryption algorithms ourselves.
+
+Fernet provides a simple API for encrypting and decrypting data using a secret key and includes authentication so tampering can be detected.
+
+**Alternatives considered**
+
+- AES implemented manually — rejected because cryptographic primitives should not be assembled manually when a well-established library is available.
+- Base64 encoding — rejected because encoding does not provide confidentiality.
+- RSA/public-key encryption for this first milestone — unnecessary complexity because the service currently needs to protect application data with a shared secret.
+
+**Libraries / technologies involved**
+
+- `cryptography`
+- Fernet
+- Symmetric encryption
+
+**Why this library / technology**
+
+The `cryptography` library is a widely used Python cryptography library, and Fernet provides a straightforward authenticated-encryption interface suitable for the initial prototype.
+
+**Security impact**
+
+Positive when keys are stored securely and are not committed to Git. Fernet provides confidentiality and integrity protection for the encrypted payload.
+
+**Trade-offs / risks**
+
+The same secret key is required for decryption. Key management is therefore critical. The prototype will use an environment variable for the encryption key, and production deployment will require a dedicated secret/key-management solution.
+
+**Files changed**
+
+- `decision.md`
+
+**Code impact**
+
+No application code yet. This decision selects the cryptographic implementation for the next milestone.
+
+**Follow-up**
+
+Install `cryptography`, generate a development encryption key, implement an encryption service, and verify encryption/decryption round-trip behavior.
