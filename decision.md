@@ -424,3 +424,49 @@ The schema will define the first customer data structure used by the PostgreSQL 
 **Follow-up**
 
 Create the table and insert safe sample data for testing the first field-specific request.
+
+---
+
+## 2026-08-13 — Use dummy customer data for development
+
+**Decision**
+
+Use fictional customer records for the initial database and API testing.
+
+**Why this approach**
+
+The project needs multiple fields in a realistic record so we can test data minimization safely. Fictional data lets us demonstrate the workflow without using real personal information.
+
+**Alternatives considered**
+
+- Use real customer data — inappropriate for development because of privacy and security concerns.
+- Use only one field — would not demonstrate the project's ability to prevent unnecessary data exposure.
+
+**Libraries / technologies involved**
+
+- PostgreSQL
+
+**Why this technology**
+
+PostgreSQL provides the structured test database in which the fictional records can be queried field-by-field.
+
+**Security impact**
+
+Positive because no real personal information is introduced into the development environment.
+
+**Trade-offs / risks**
+
+The sample data is intentionally simple and does not represent a production customer schema.
+
+**Files changed**
+
+- `app/schema.sql`
+- `decision.md`
+
+**Code impact**
+
+Added three fictional customer records for controlled testing.
+
+**Follow-up**
+
+Use these records to verify that the application can retrieve one requested field without returning the complete customer record.
