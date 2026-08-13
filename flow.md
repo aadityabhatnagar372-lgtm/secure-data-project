@@ -2323,3 +2323,47 @@ Current limitation
 The database replicas are running independently, but the Docker Compose configuration has not yet been updated to manage the complete replication topology declaratively.
 
 The application services also still need explicit database-node-to-database mapping.
+
+---
+
+## 46. Code-Verified Dual PostgreSQL Replication Streams — Milestone 37
+
+**Verified on:** 2026-08-13
+
+### Primary replication status
+
+The primary PostgreSQL server reported two active WAL replication connections.
+
+### Verification command
+
+`docker exec secure-data-postgres psql -U secure_user -d secure_data -c "SELECT application_name, client_addr, state, sync_state FROM pg_stat_replication;"`
+
+### Verification result
+
+```text
+application_name | client_addr | state      | sync_state
+-----------------+-------------+------------+-----------
+walreceiver      | 172.18.0.3  | streaming  | async
+walreceiver      | 172.18.0.4  | streaming  | async
+Interpretation
+Replica 1 is actively streaming from the primary.
+Replica 2 is actively streaming from the primary.
+Both replicas are asynchronous standbys.
+Current architecture
+
+PostgreSQL Primary
+↓ WAL streaming
+├── PostgreSQL Replica 1
+└── PostgreSQL Replica 2
+
+Availability result
+
+The PostgreSQL layer now has two active streaming replicas.
+
+Combined with the application-level failover routing, the system has both:
+
+database-level replication
+application-level replica failover
+Current limitation
+
+The replication topology is currently created manually with Docker commands.
