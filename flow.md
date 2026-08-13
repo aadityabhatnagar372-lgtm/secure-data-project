@@ -2087,3 +2087,66 @@ Field scope
 Current limitation
 
 Expiration has been verified at the access-key store level.
+
+---
+
+## 42. Code-Verified Primary and Replica Node Directory — Milestone 33
+
+**Verified on:** 2026-08-13
+
+### Module
+
+`app/node_directory.py`
+
+### Verification
+
+Command:
+
+`python -c "from app.node_directory import get_primary_node, get_replica_nodes; print('Primary:', get_primary_node('customer')); print('Replicas:', get_replica_nodes('customer'))"`
+
+### Verification result
+
+Primary:
+
+```text
+DataNode(
+    name='customer-node-1',
+    host='localhost',
+    port=8001,
+    role='primary'
+)
+
+Replicas:
+
+DataNode(
+    name='customer-node-2',
+    host='localhost',
+    port=8002,
+    role='replica'
+)
+
+DataNode(
+    name='customer-node-3',
+    host='localhost',
+    port=8003,
+    role='replica'
+)
+Current architecture
+
+Customer data
+↓
+Primary Node 1
+↓
+Replica Node 2
+↓
+Replica Node 3
+
+Security / availability result
+
+The directory now explicitly identifies the primary node and replica nodes, providing the metadata required for an explicit failover path.
+
+Current limitation
+
+The replicas are metadata entries only.
+
+Actual customer-data replication has not yet been implemented, and the request flow does not yet automatically fail over to a replica when the primary is unavailable.
