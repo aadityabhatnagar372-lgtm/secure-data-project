@@ -1043,3 +1043,54 @@ A second independent customer-data service will be added to the local distribute
 **Follow-up**
 
 Create Node 2, expose its health endpoint, and verify that both nodes can run independently.
+
+---
+
+## 2026-08-13 — Use an established cryptographic library for data protection
+
+**Decision**
+
+Use an established Python cryptographic library for application-level encryption rather than implementing cryptographic algorithms manually.
+
+**Why this approach**
+
+The project needs to protect sensitive data while avoiding custom cryptographic implementations. Established libraries provide tested implementations of standard encryption primitives and reduce the risk of cryptographic programming errors.
+
+The first implementation will use authenticated encryption so that confidentiality and integrity are provided together.
+
+**Alternatives considered**
+
+- Custom encryption code — rejected because cryptographic implementations should not be invented for this project.
+- Plain encoding such as Base64 — rejected because encoding does not provide confidentiality.
+- Encryption without authentication — weaker because confidentiality is provided without reliable integrity protection.
+
+**Libraries / technologies involved**
+
+- Python cryptographic library to be selected during implementation
+- Established authenticated-encryption algorithm
+
+**Why this technology**
+
+The selected library will provide standard cryptographic primitives and avoid implementing encryption logic from scratch.
+
+**Security impact**
+
+Positive. Properly implemented authenticated encryption can protect data confidentiality and detect tampering.
+
+Encryption keys must be protected separately from application data and must never be hardcoded into Git-tracked source files.
+
+**Trade-offs / risks**
+
+Encryption introduces key-management requirements. Losing or exposing encryption keys can make protected data inaccessible or compromise its confidentiality.
+
+**Files changed**
+
+- `decision.md`
+
+**Code impact**
+
+No application code yet. This decision defines the cryptographic approach for the next implementation stage.
+
+**Follow-up**
+
+Select the cryptographic library and authenticated-encryption method, then implement a small encryption/decryption service and verify round-trip behavior.
