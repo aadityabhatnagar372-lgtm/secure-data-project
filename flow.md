@@ -2776,3 +2776,46 @@ The final manual security verification must still be performed against the runni
 ### Final documentation
 
 After the manual checks pass, update the README with the final architecture, security controls, verification results, and project limitations.
+
+---
+
+## 55. Code-Verified Expired Access-Key Rejection — Milestone 46
+
+**Verified on:** 2026-08-13
+
+### Test
+
+An access key with an expiration timestamp in the past was created and supplied to:
+
+`GET /customer/1/email`
+
+A valid JWT was also supplied.
+
+### Verification result
+
+HTTP status:
+
+`401 Unauthorized`
+
+Response:
+
+```json
+{
+    "detail": "Invalid or expired access key"
+}
+Security result
+
+The protected customer-data endpoint rejects expired access keys before data retrieval occurs.
+
+Access-key verification summary
+
+The following behaviors have now been verified:
+
+Access-key generation
+Access-key storage
+Approximately 10-minute expiration
+Missing access-key rejection
+Expired access-key rejection
+User scope validation
+Customer scope validation
+Field scope validation
