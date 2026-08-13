@@ -237,3 +237,49 @@ Added the initial FastAPI application with / and /health endpoints and verified 
 Follow-up
 
 Add the first controlled data-request endpoint, then introduce authentication and authorization before exposing sensitive data.
+
+---
+
+## 2026-08-13 — Use PostgreSQL for the first data node
+
+**Decision**
+
+Use PostgreSQL as the database for the first Docker-based data node.
+
+**Why this approach**
+
+PostgreSQL gives the project a reliable relational database for storing structured test data. It integrates well with Python and can run as an isolated Docker container, which makes it suitable for gradually expanding the prototype into multiple data nodes.
+
+**Alternatives considered**
+
+- SQLite — very simple, but less representative of a server-based distributed data architecture.
+- MongoDB — possible, but the initial project data is structured and relational, so PostgreSQL is a better fit for the first prototype.
+
+**Libraries / technologies involved**
+
+- PostgreSQL
+- Docker
+
+**Why this technology**
+
+PostgreSQL supports precise queries such as selecting only the requested field. Docker lets us run the database as an isolated node and later create additional nodes or replicas.
+
+**Security impact**
+
+The database will not be exposed directly to the user. The application will control which fields can be requested and returned.
+
+**Trade-offs / risks**
+
+Running multiple database nodes increases configuration and synchronization complexity. PostgreSQL itself does not provide the project's authorization or data-minimization logic; those controls must be implemented by the application.
+
+**Files changed**
+
+- `decision.md`
+
+**Code impact**
+
+No application code yet. This decision defines the database technology for the first data node.
+
+**Follow-up**
+
+Create the first PostgreSQL Docker service and verify that the application can communicate with it.
