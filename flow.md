@@ -620,3 +620,49 @@ JSON response
     "customer_id": 1,
     "email": "placeholder@example.com"
 }
+
+---
+
+## 15. Code-Verified Database-Backed Customer Email Endpoint — Milestone 6
+
+**Verified on:** 2026-08-13
+
+### Endpoint
+
+`GET /customer/{customer_id}/email`
+
+### Execution flow
+
+Browser / API client
+    ↓
+HTTP GET request
+    ↓
+`app.main`
+    ↓
+FastAPI router
+    ↓
+`get_customer_email(customer_id)`
+    ↓
+`get_connection()`
+    ↓
+Psycopg 3
+    ↓
+PostgreSQL `customers` table
+    ↓
+`SELECT email FROM customers WHERE id = %s`
+    ↓
+Email value returned
+    ↓
+JSON response
+
+### Verified request
+
+`GET /customer/1/email`
+
+### Verified response
+
+```json
+{
+    "customer_id": 1,
+    "email": "alice@example.com"
+}
