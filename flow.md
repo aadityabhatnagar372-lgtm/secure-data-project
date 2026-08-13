@@ -481,3 +481,49 @@ PostgreSQL accepts connections
 The FastAPI application is **not connected to PostgreSQL yet**.
 
 No application-level database query has been implemented or verified.
+
+---
+
+## 12. Code-Verified PostgreSQL Connection — Milestone 3
+
+**Verified on:** 2026-08-13
+
+### Entry point
+
+`app/database.py`
+
+### Function
+
+`get_connection()`
+
+### Execution flow
+
+Python application
+    ↓
+Imports `app.database`
+    ↓
+Calls `get_connection()`
+    ↓
+Reads database configuration
+    ↓
+Psycopg 3 creates PostgreSQL connection
+    ↓
+PostgreSQL accepts connection
+    ↓
+Connection is returned to the caller
+    ↓
+Caller closes the connection
+
+### Verification command
+
+`python -c "from app.database import get_connection; conn = get_connection(); print('Database connection successful'); conn.close()"`
+
+### Verification result
+
+`Database connection successful`
+
+### Current limitation
+
+The connection has been verified, but the application has not yet created any database tables or performed a data query.
+
+The FastAPI request path is also not connected to the database yet.
