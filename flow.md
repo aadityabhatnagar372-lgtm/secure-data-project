@@ -720,3 +720,56 @@ We have verified token generation, but we have **not yet implemented**:
 - JWT validation
 - Protected API endpoints
 - Authorization
+
+---
+
+## 17. Code-Verified Users Table — Milestone 8
+
+**Verified on:** 2026-08-13
+
+### Database object
+
+Table: `users`
+
+### Fields
+
+- `id` — primary key
+- `username` — unique username
+- `password_hash` — stored password hash
+
+### Verification
+
+Command:
+
+`Get-Content app/users.sql | docker exec -i secure-data-postgres psql -U secure_user -d secure_data`
+
+Result:
+
+`CREATE TABLE`
+
+Command:
+
+`docker exec secure-data-postgres psql -U secure_user -d secure_data -c "\d users"`
+
+Result:
+
+- `id` is the primary key.
+- `username` has a unique constraint.
+- `password_hash` is required.
+- No plaintext password field exists.
+
+### Current verified flow
+
+User schema
+    ↓
+PostgreSQL
+    ↓
+`users` table
+    ↓
+Username + password hash can be stored
+
+### Current limitation
+
+No user record has been created yet.
+
+Password hashing and login verification have not yet been connected to this table.
