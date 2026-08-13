@@ -1144,3 +1144,68 @@ No application code yet. This decision selects the cryptographic implementation 
 **Follow-up**
 
 Install `cryptography`, generate a development encryption key, implement an encryption service, and verify encryption/decryption round-trip behavior.
+
+---
+
+## 2026-08-13 — Use a short-lived scoped access key for protected data
+
+**Decision**
+
+Issue a cryptographically random, short-lived access key for an authorized data request.
+
+The key will be scoped to the authenticated user, requested customer, and requested field, and will expire after approximately 10 minutes.
+
+**Why this approach**
+
+The project requires more than simple user authentication. After a user is authenticated and authorized, the system should be able to issue a temporary access credential that limits the lifetime and scope of access to the requested data.
+
+This reduces the usefulness of a stolen access key because it expires automatically and is associated with a specific access scope.
+
+**Alternatives considered**
+
+- Use the JWT itself as the temporary data-access credential — rejected because authentication and short-lived data access are separate concerns in this project.
+- Long-lived API key — rejected because compromise would provide a larger abuse window.
+- One key for unrestricted data access — rejected because the key should be scoped to the specific authorized request.
+- Use a custom cryptographic algorithm — rejected because randomness and cryptographic primitives should come from established libraries.
+
+**Libraries / technologies involved**
+
+- Python `secrets`
+- Time-based expiration using Python datetime/time utilities
+- Existing JWT authentication
+
+**Why this technology**
+
+Python's `secrets` module provides cryptographically secure random values suitable for generating unpredictable access tokens.
+
+The server can associate each token with an expiration timestamp and validate that expiration before allowing access.
+
+**Security impact**
+
+Positive when the token is:
+
+- cryptographically random
+- short-lived
+- scoped to the authorized resource
+- validated server-side on every use
+- never stored or logged in plaintext where avoidable
+
+The access key does not replace authentication or authorization.
+
+**Trade-offs / risks**
+
+The server must store or otherwise validate issued access keys and their expiration state. Short expiration increases the need to issue new keys for subsequent access.
+
+Clock handling and token cleanup must also be considered.
+
+**Files changed**
+
+- `decision.md`
+
+**Code impact**
+
+No application code yet. This decision defines the short-lived access-key mechanism for the next implementation stage.
+
+**Follow-up**
+
+Implement the short-lived access-key service, generate a 10-minute token for an authorized request, and verify that expired keys are rejected.
