@@ -872,3 +872,53 @@ The development password is known only for local testing. It must not be reused 
 The login endpoint has not yet been implemented.
 
 The application still does not retrieve the user record and verify the submitted password during an API login request.
+
+---
+
+## 20. Code-Verified Login Endpoint Structure — Milestone 11
+
+**Verified on:** 2026-08-13
+
+### Endpoint
+
+`POST /login`
+
+### Request model
+
+`LoginRequest`
+
+Fields:
+
+- `username`
+- `password`
+
+### Execution flow
+
+Swagger / API client
+    ↓
+`POST /login`
+    ↓
+Pydantic validates `LoginRequest`
+    ↓
+`login(request)`
+    ↓
+Placeholder response
+
+### Verification result
+
+The endpoint returned HTTP 200 successfully.
+
+The response confirmed that the submitted username reached the login function.
+
+### Current limitation
+
+The endpoint currently does **not**:
+
+- Query PostgreSQL for the user
+- Verify the password against the Argon2 hash
+- Generate a JWT
+- Reject invalid credentials
+
+### Next implementation
+
+Connect the login function to PostgreSQL and verify the submitted password using the existing Argon2 password-verification function.
