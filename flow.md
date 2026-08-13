@@ -1887,3 +1887,87 @@ wrong customer → rejected
 wrong user → rejected
 wrong field → rejected
 expired access key → rejected
+
+---
+
+## 38. Code-Verified Temporary Access-Key Data Retrieval — Milestone 29
+
+**Verified on:** 2026-08-13
+
+### Endpoint
+
+`GET /customer/{customer_id}/email`
+
+### Required credentials
+
+- Valid JWT
+- Valid `X-Access-Key`
+
+### Verification
+
+A valid JWT was used to authenticate the user.
+
+A newly issued 10-minute access key scoped to:
+
+- Customer: `1`
+- Field: `email`
+
+was supplied in the `X-Access-Key` header.
+
+### Verification result
+
+HTTP status:
+
+`200 OK`
+
+Response:
+
+```json
+{
+    "customer_id": 1,
+    "email": "alice@example.com"
+}
+Verified flow
+
+JWT
+↓
+Authentication
+↓
+Customer authorization
+↓
+Issue scoped access key
+↓
+Store access key
+↓
+Client supplies X-Access-Key
+↓
+Validate token
+↓
+Validate user scope
+↓
+Validate customer scope
+↓
+Validate field scope
+↓
+Customer Data Node
+↓
+Return customer email
+
+Security result
+
+The customer-data endpoint now requires both authentication and a valid short-lived scoped access key.
+
+The access key limits access to the authorized user, customer, and field and expires after 10 minutes.
+
+Current limitation
+
+The valid-key path is verified.
+
+Remaining access-key security tests include:
+
+Wrong customer
+Wrong user
+Wrong field
+Expired key
+
+These tests should be completed before marking the access-key integration fully tested.
