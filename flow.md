@@ -1772,3 +1772,60 @@ The access key is not yet connected to the customer-data request flow.
 The application does not yet require this 10-minute key before returning protected data.
 
 The store is also in-memory, so it is not shared between multiple API processes or nodes.
+
+---
+
+## 36. Code-Verified Scoped Access-Key Issuance — Milestone 27
+
+**Verified on:** 2026-08-13
+
+### Endpoint
+
+`POST /access-key`
+
+### Verified request
+
+```json
+{
+    "customer_id": 1,
+    "field": "email"
+}
+
+A valid JWT was supplied with the request.
+
+Verification result
+
+HTTP status: 200
+
+Response contained:
+
+access_key
+customer_id = 1
+field = email
+expires_at
+
+The expiration timestamp was approximately 10 minutes after issuance.
+
+Verified flow
+
+JWT
+↓
+Authentication
+↓
+Customer authorization
+↓
+Generate scoped access key
+↓
+Store access key
+↓
+Return token and expiration
+
+Security result
+
+The temporary access key is issued only after the authenticated user passes the customer authorization check.
+
+The key is scoped to the requested customer and field and has a 10-minute expiration.
+
+Current limitation
+
+The customer-data endpoint does not yet require the issued access key.
