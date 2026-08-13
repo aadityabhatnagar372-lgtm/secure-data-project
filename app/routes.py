@@ -1,15 +1,15 @@
+import json
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
-import json
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException
 
+from app.access_key import AccessKeyRequest, generate_access_key
+from app.access_key_store import get_access_key, store_access_key
 from app.auth import get_current_user
 from app.data_minimizer import build_customer_select
 from app.database import get_connection
 from app.node_directory import get_node_for_data
-from app.access_key import AccessKeyRequest, generate_access_key
-from app.access_key_store import store_access_key
 
 router = APIRouter()
 
@@ -75,16 +75,44 @@ def request_customer_email_from_node(customer_id: int) -> dict:
 def get_customer_email(
     customer_id: int,
     current_user_id: int = Depends(get_current_user),
+    access_key: str | None = Header(default=None, alias="X-Access-Key"),
 ):
-    if not check_customer_access(current_user_id, customer_id):
+    if access_key is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Access key is required",
+        )
+
+    stored_key = get_access_key(access_key)
+
+    if stored_key is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid or expired access key",
+        )
+
+    if stored_key["user_id"] != current_user_id:
         raise HTTPException(
             status_code=403,
-            detail="You are not authorized to access this customer",
+            detail="Access key does not belong to the authenticated user",
+        )
+
+    if stored_key["customer_id"] != customer_id:
+        raise HTTPException(
+            status_code=403,
+            detail="Access key is not valid for this customer",
+        )
+
+    if stored_key["field"] != "email":
+        raise HTTPException(
+            status_code=403,
+            detail="Access key is not valid for this field",
         )
 
     build_customer_select("email")
 
     return request_customer_email_from_node(customer_id)
+
 
 @router.post("/access-key")
 def issue_access_key(
