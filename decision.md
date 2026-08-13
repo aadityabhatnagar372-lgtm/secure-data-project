@@ -767,3 +767,52 @@ The users data model will gain an authorization relationship, and protected rout
 **Follow-up**
 
 Add the user-to-customer relationship, create test authorization data, implement the authorization check, and verify both allowed and denied requests.
+
+---
+
+## 2026-08-13 — Use a metadata directory for data-node discovery
+
+**Decision**
+
+Use a lightweight metadata directory to map logical data identifiers to the node or service responsible for storing that data.
+
+**Why this approach**
+
+The API needs a reliable way to determine where a requested record is stored when data is distributed across multiple nodes.
+
+The directory will contain routing metadata, such as which node owns a customer record, but it will not contain the customer's full data.
+
+**Alternatives considered**
+
+- Hardcode node addresses in application code — simple for a tiny prototype, but difficult to maintain as nodes are added or moved.
+- Broadcast every request to all nodes — avoids a directory, but increases network traffic and unnecessary data access.
+- Fully peer-to-peer discovery — possible, but adds substantial complexity for the first prototype.
+
+**Libraries / technologies involved**
+
+- PostgreSQL or a small metadata store for the initial directory
+- FastAPI for the discovery API/service
+
+**Why this technology**
+
+A simple metadata store is enough for the initial prototype and is easy to inspect and test. It can later be replaced by a dedicated service-discovery mechanism if the architecture grows.
+
+**Security impact**
+
+The directory should expose only the metadata required to route requests. It should not expose customer data or sensitive database credentials.
+
+**Trade-offs / risks**
+
+A central metadata directory can itself become a point of failure if it is not replicated. It is intentionally a routing component, not the central repository for all application data.
+
+**Files changed**
+
+- `decision.md`
+
+**Code impact**
+
+No code yet. This decision defines how the system will locate distributed data before querying a data node.
+
+**Follow-up**
+
+Create a small node-directory structure and verify that a customer identifier can be mapped to a data node.
