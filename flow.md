@@ -1195,3 +1195,54 @@ The server performs an additional authorization check before executing the custo
 Current limitation
 
 The authorization model currently uses simple user-to-customer ownership.
+
+---
+
+## 26. Code-Verified Data Node Directory — Milestone 17
+
+**Verified on:** 2026-08-13
+
+### Module
+
+`app/node_directory.py`
+
+### Components
+
+`DataNode`
+
+`get_node_for_data(data_type)`
+
+### Verification
+
+Command:
+
+`python -c "from app.node_directory import get_node_for_data; node = get_node_for_data('customer'); print(node); print(node.name, node.host, node.port)"`
+
+### Verification result
+
+```text
+DataNode(name='customer-node-1', host='localhost', port=5432)
+customer-node-1 localhost 5432
+Current verified flow
+
+Requested data type
+↓
+get_node_for_data("customer")
+↓
+DATA_NODES lookup
+↓
+customer-node-1
+↓
+localhost:5432
+
+Security result
+
+The directory contains only routing metadata.
+
+It does not contain the customer's actual data.
+
+Current limitation
+
+The customer API does not yet use the node directory to locate its database.
+
+The current implementation still connects directly using the existing database configuration.
