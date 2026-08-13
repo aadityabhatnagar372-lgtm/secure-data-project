@@ -1,5 +1,6 @@
 import secrets
 from datetime import datetime, timedelta, timezone
+from pydantic import BaseModel
 
 
 ACCESS_KEY_EXPIRE_MINUTES = 10
@@ -24,3 +25,7 @@ def generate_access_key(
         "field": field,
         "expires_at": expires_at,
     }
+
+class AccessKeyRequest(BaseModel):
+    customer_id: int
+    field: str
