@@ -377,3 +377,49 @@ Verification result
 Both / and /health were verified successfully, and the FastAPI interactive documentation displayed both endpoints.
 
 Current limitation: No authentication, authorization, database, encryption, temporary credential, distributed-node, or failover logic exists yet.
+
+---
+
+## 10. Planned Data Access Flow — PostgreSQL Node
+
+**Status:** Planned — not yet implemented.
+
+The first database-backed request is planned to follow this flow:
+
+User / Client
+    |
+    v
+FastAPI API
+    |
+    v
+Request validation
+    |
+    v
+Data access layer
+    |
+    v
+PostgreSQL Data Node
+    |
+    v
+Retrieve only requested field
+    |
+    v
+Return minimal response to client
+
+### Planned Example
+
+Request:
+
+`GET /customer/101/email`
+
+Expected behavior:
+
+1. FastAPI receives the request.
+2. The application validates the requested customer and field.
+3. The data access layer queries PostgreSQL.
+4. The query retrieves only the `email` field.
+5. The application returns only the requested email.
+
+### Important limitation
+
+This flow is **planned only**. PostgreSQL has not yet been connected to the application, so no database call is currently verified.
