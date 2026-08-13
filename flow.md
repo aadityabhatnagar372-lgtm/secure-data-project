@@ -823,3 +823,52 @@ Passwords are hashed before storage and are not stored as plaintext.
 ### Current limitation
 
 Password hashing is verified, but it has not yet been connected to the `users` table or login endpoint.
+
+---
+
+## 19. Code-Verified Development User — Milestone 10
+
+**Verified on:** 2026-08-13
+
+### Database object
+
+Table: `users`
+
+### Development account
+
+Username: `testuser`
+
+Password: stored only as an Argon2 hash.
+
+### Verification
+
+The user record was inserted into PostgreSQL and then queried directly.
+
+Verified result:
+
+- User record exists.
+- Username is `testuser`.
+- Password is stored as an Argon2 hash beginning with `$argon2id$`.
+- No plaintext password is stored in the database.
+
+### Current verified flow
+
+Development password
+    ↓
+Argon2 hashing
+    ↓
+Password hash
+    ↓
+`users.password_hash`
+    ↓
+PostgreSQL
+
+### Security note
+
+The development password is known only for local testing. It must not be reused for a real deployment.
+
+### Current limitation
+
+The login endpoint has not yet been implemented.
+
+The application still does not retrieve the user record and verify the submitted password during an API login request.
