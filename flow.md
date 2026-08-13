@@ -2539,3 +2539,47 @@ The audit logger records security-relevant events while filtering configured sen
 Current limitation
 
 The audit logger has been verified independently, but security events have not yet been added to the actual login, access-key, authorization, data-access, and failover paths.
+
+---
+
+## 50. Code-Verified Login Audit Logging — Milestone 41
+
+**Verified on:** 2026-08-13
+
+### Integrated events
+
+The login flow now records:
+
+- `login_success`
+- `login_failure`
+
+### Successful-login verification
+
+```text
+audit_event=login_success details={'user_id': 2, 'username': 'testuser'}
+Successful login audit test completed
+Failed-login verification
+audit_event=login_failure details={'username': 'testuser'}
+Failed login audit test completed
+Security result
+
+Login events are now auditable without logging:
+
+passwords
+password hashes
+JWTs
+access keys
+encryption keys
+other configured secrets
+Current limitation
+
+Audit logging is currently integrated into the login flow only.
+
+It has not yet been integrated into:
+
+access-key issuance
+access-key rejection
+authorization denial
+customer-data access
+node failover
+data-node errors
