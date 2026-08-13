@@ -1134,3 +1134,64 @@ Authorization decision
 Current limitation
 
 The relationship exists in PostgreSQL, but the FastAPI endpoint does not yet enforce the comparison.
+
+---
+
+## 25. Code-Verified Fine-Grained Authorization — Milestone 16
+
+**Verified on:** 2026-08-13
+
+### Authorization rule
+
+`testuser` is associated with `customer_id = 1`.
+
+### Allowed request
+
+`GET /customer/1/email`
+
+Result:
+
+```text
+HTTP 200
+
+The requested email was returned.
+
+Denied request
+
+GET /customer/2/email
+
+The same valid JWT was used.
+
+Result:
+
+HTTP 403 Forbidden
+
+Response:
+
+{
+    "detail": "You are not authorized to access this customer"
+}
+Execution flow
+
+JWT
+↓
+Authenticated user ID
+↓
+Lookup users.customer_id
+↓
+Compare with requested customer_id
+↓
+Match → continue
+No match → 403 Forbidden
+↓
+Only authorized customer data can be queried
+
+Security result
+
+A valid authentication token is not sufficient to access arbitrary customer data.
+
+The server performs an additional authorization check before executing the customer-data query.
+
+Current limitation
+
+The authorization model currently uses simple user-to-customer ownership.
