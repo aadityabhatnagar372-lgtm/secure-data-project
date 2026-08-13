@@ -1,8 +1,13 @@
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
+import json
+
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.auth import get_current_user
 from app.data_minimizer import build_customer_select
 from app.database import get_connection
+from app.node_directory import get_node_for_data
 
 router = APIRouter()
 
@@ -23,6 +28,47 @@ def check_customer_access(user_id: int, customer_id: int) -> bool:
     return user[0] == customer_id
 
 
+def request_customer_email_from_node(customer_id: int) -> dict:
+    """Request customer email data from the responsible data node."""
+    node = get_node_for_data("customer")
+
+    if node is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Customer data node is unavailable",
+        )
+
+    url = f"http://{node.host}:8001/customer/{customer_id}/email"
+
+    request = Request(
+        url,
+        headers={"Accept": "application/json"},
+        method="GET",
+    )
+
+    try:
+        with urlopen(request, timeout=5) as response:
+            return json.loads(response.read().decode("utf-8"))
+
+    except HTTPError as exc:
+        if exc.code == 404:
+            raise HTTPException(
+                status_code=404,
+                detail="Customer not found",
+            )
+
+        raise HTTPException(
+            status_code=502,
+            detail="Customer data node returned an error",
+        )
+
+    except URLError:
+        raise HTTPException(
+            status_code=503,
+            detail="Customer data node is unavailable",
+        )
+
+
 @router.get("/customer/{customer_id}/email")
 def get_customer_email(
     customer_id: int,
@@ -34,20 +80,6 @@ def get_customer_email(
             detail="You are not authorized to access this customer",
         )
 
-    query = build_customer_select("email")
+    build_customer_select("email")
 
-    with get_connection() as connection:
-        with connection.cursor() as cursor:
-            cursor.execute(query, (customer_id,))
-            customer = cursor.fetchone()
-
-    if customer is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Customer not found",
-        )
-
-    return {
-        "customer_id": customer_id,
-        "email": customer[0],
-    }
+    return request_customer_email_from_node(customer_id)
