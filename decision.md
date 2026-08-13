@@ -994,3 +994,52 @@ The main API will stop querying the customer database directly and instead reque
 **Follow-up**
 
 Add a customer-data endpoint to the customer node and make the main API call it through the node-directory mapping.
+
+---
+
+## 2026-08-13 — Add a second data node for distributed testing
+
+**Decision**
+
+Add a second customer data node running as an independent service for distributed-system testing.
+
+**Why this approach**
+
+The project is intended to demonstrate multiple data nodes rather than a single service. A second node gives us a concrete environment for testing node discovery, routing, failure handling, and later replication.
+
+**Alternatives considered**
+
+- Continue with only one node — simpler, but does not demonstrate distributed behavior.
+- Add three nodes immediately — closer to the final architecture, but adds complexity before the two-node workflow is verified.
+- Use a remote server for Node 2 — unnecessary for the local prototype.
+
+**Libraries / technologies involved**
+
+- FastAPI
+- Docker / local service processes
+- PostgreSQL
+
+**Why this technology**
+
+The same service pattern as Node 1 keeps the architecture consistent while allowing the node address and storage configuration to differ.
+
+**Security impact**
+
+A second node increases the attack surface, so node-to-node and API-to-node trust controls will need to be added later.
+
+**Trade-offs / risks**
+
+Running multiple nodes locally increases configuration complexity. Until replication is implemented, the nodes may contain different data and should not be assumed to be consistent.
+
+**Files changed**
+
+- `decision.md`
+- Future Node 2 service files
+
+**Code impact**
+
+A second independent customer-data service will be added to the local distributed architecture.
+
+**Follow-up**
+
+Create Node 2, expose its health endpoint, and verify that both nodes can run independently.
