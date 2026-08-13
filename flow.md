@@ -2583,3 +2583,40 @@ authorization denial
 customer-data access
 node failover
 data-node errors
+
+---
+
+## 51. Code-Verified Protected Data Audit Logging — Milestone 42
+
+**Verified on:** 2026-08-13
+
+### Verified audit events
+
+The protected-data flow now records:
+
+- `access_key_issued`
+- `authorization_denied`
+- `customer_data_access`
+
+### Verification result
+
+```text
+audit_event=access_key_issued details={'user_id': 2, 'customer_id': 1, 'field': 'email'}
+audit_event=authorization_denied details={'user_id': 2, 'customer_id': 2, 'reason': 'customer_mismatch'}
+audit_event=customer_data_access details={'user_id': 2, 'customer_id': 1, 'field': 'email'}
+Protected-flow audit test completed
+Secret filtering
+
+An access-key value was deliberately supplied to the audit function:
+
+DO_NOT_LOG
+
+The value was not included in the generated log output.
+
+Security result
+
+Audit logging is now integrated into important protected-data workflows without exposing the access-key token.
+
+Current limitation
+
+Node failover events and data-node errors are not yet explicitly logged.
