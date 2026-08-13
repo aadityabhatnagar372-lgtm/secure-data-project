@@ -2150,3 +2150,61 @@ Current limitation
 The replicas are metadata entries only.
 
 Actual customer-data replication has not yet been implemented, and the request flow does not yet automatically fail over to a replica when the primary is unavailable.
+
+---
+
+## 43. Code-Verified Primary-to-Replica Failover — Milestone 34
+
+**Verified on:** 2026-08-13
+
+### Failure condition
+
+Customer Node 1 was stopped and was therefore unavailable on port `8001`.
+
+### Request
+
+The main API received:
+
+`GET /customer/1/email`
+
+with a valid JWT and valid scoped access key.
+
+### Main API result
+
+HTTP status:
+
+`200 OK`
+
+Response:
+
+```json
+{
+    "customer_id": 1,
+    "email": "alice@example.com"
+}
+Replica verification
+
+Customer Node 2 log confirmed:
+
+GET /customer/1/email HTTP/1.1" 200 OK
+Verified flow
+
+Main API
+↓
+Primary Node 1 unavailable
+↓
+Try Replica Node 2
+↓
+Customer data retrieved
+↓
+HTTP 200 returned to client
+
+Availability result
+
+The main API can continue serving an authorized request when the primary application node is unavailable.
+
+Current limitation
+
+The current implementation demonstrates application-level service failover.
+
+Node 2 and Node 3 currently use the same PostgreSQL data source, so independent database replication has not yet been implemented.
