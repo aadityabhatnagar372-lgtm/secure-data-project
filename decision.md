@@ -621,3 +621,50 @@ No application code yet. This decision defines the login architecture for the ne
 **Follow-up**
 
 Select a password-hashing library, create the users table, add a test user, and implement the login endpoint.
+
+---
+
+## 2026-08-13 — Use Argon2 for password hashing
+
+**Decision**
+
+Use Argon2 for hashing user passwords before storing them in PostgreSQL.
+
+**Why this approach**
+
+Passwords must never be stored in plaintext. Argon2 is designed specifically for password hashing and is intentionally expensive to compute, which makes large-scale password guessing more difficult.
+
+**Alternatives considered**
+
+- Plain SHA-256/SHA-512 — fast general-purpose hashes are not appropriate for password storage because attackers can test large numbers of guesses quickly.
+- PBKDF2 — a valid password-hashing approach, but Argon2 is the preferred choice for this prototype.
+- bcrypt — also widely used and suitable, but Argon2 provides the password-hashing design selected for this project.
+
+**Libraries / technologies involved**
+
+- Argon2 password hashing library
+- PostgreSQL
+
+**Why this library / technology**
+
+The password-hashing library will handle salt generation, password hashing, and password verification instead of requiring us to implement cryptographic password handling ourselves.
+
+**Security impact**
+
+Positive. Passwords will be stored as password hashes rather than plaintext. Password verification will compare the submitted password against the stored hash.
+
+**Trade-offs / risks**
+
+Password hashing is intentionally computationally expensive, so login operations require more CPU resources than simple hashing. The hashing parameters should be reviewed before production deployment.
+
+**Files changed**
+
+- `decision.md`
+
+**Code impact**
+
+No application code yet. This decision selects the password-hashing mechanism for the login implementation.
+
+**Follow-up**
+
+Install the Argon2 library, create the users table, add a development user with a hashed password, and implement password verification.
