@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: secure-data-postgres
+    environment:
+      POSTGRES_DB: secure_data
+      POSTGRES_USER: secure_user
+      POSTGRES_PASSWORD: secure_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
