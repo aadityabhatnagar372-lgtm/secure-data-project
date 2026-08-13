@@ -2208,3 +2208,59 @@ Current limitation
 The current implementation demonstrates application-level service failover.
 
 Node 2 and Node 3 currently use the same PostgreSQL data source, so independent database replication has not yet been implemented.
+
+---
+
+## 44. Code-Verified PostgreSQL Streaming Replication — Milestone 35
+
+**Verified on:** 2026-08-13
+
+### Primary database
+
+`secure-data-postgres:5432`
+
+### Replica database
+
+`secure-data-postgres-replica1:5433`
+
+### Replication state
+
+Replica 1 reported:
+
+```text
+status = streaming
+sender_host = secure-data-postgres
+sender_port = 5432
+
+Replica 1 also reported:
+
+pg_is_in_recovery() = true
+Replication test
+
+A new customer record was inserted into the primary:
+
+id = 4
+name = Replication Test
+email = replication@example.com
+
+The same record was then queried from Replica 1 and returned successfully.
+
+Verification result
+Primary
+    ↓
+WAL streaming replication
+    ↓
+Replica 1
+    ↓
+Replication Test record available
+Security / availability result
+
+The first independent PostgreSQL replica is now receiving changes from the primary.
+
+This provides actual database-level redundancy in addition to the previously implemented application-level failover.
+
+Current limitation
+
+Only Replica 1 has been configured so far.
+
+Replica 2 has not yet been configured for PostgreSQL streaming replication.
